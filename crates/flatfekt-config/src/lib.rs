@@ -527,6 +527,7 @@ impl RootConfig {
       }
     }
 
+    #[cfg(unix)]
     {
       let ub = self.unix_backend();
       if ub != "wayland" && ub != "x11"
@@ -544,13 +545,19 @@ impl RootConfig {
         );
       }
     }
-    if self.render_backend() != "vulkan"
+    let rb = self.render_backend();
+    if rb != "vulkan"
+      && rb != "dx12"
+      && rb != "metal"
+      && rb != "auto"
     {
       return Err(
         ConfigError::Validate(format!(
           "unsupported render.backend \
-           {:?}; expected \"vulkan\"",
-          self.render_backend()
+           {:?}; expected \"vulkan\", \
+           \"dx12\", \"metal\", \
+           or \"auto\"",
+          rb
         ))
       );
     }

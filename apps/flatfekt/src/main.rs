@@ -110,10 +110,11 @@ fn main() -> anyhow::Result<()> {
     | Command::Run {
       scene
     } => {
+      #[cfg(unix)]
       configure_unix_backend_env(
         &cfg, cli.x11
       )?;
-      require_vulkan_adapter()?;
+      require_render_adapter(&cfg)?;
       let scene_file =
         load_scene(&scene)?;
       let scene_allows_inspector =
@@ -309,11 +310,20 @@ fn run_log_file_name()
   ))
 }
 
-fn require_vulkan_adapter()
--> anyhow::Result<()> {
+fn require_render_adapter(
+  cfg: &RootConfig
+) -> anyhow::Result<()> {
+  let rb = cfg.render_backend();
+  let backends = match rb {
+    | "vulkan" => wgpu::Backends::VULKAN,
+    | "dx12" => wgpu::Backends::DX12,
+    | "metal" => wgpu::Backends::METAL,
+    | "auto" | _ => wgpu::Backends::all()
+  };
+
   let instance =
     wgpu::Instance::new(wgpu::InstanceDescriptor {
-      backends: wgpu::Backends::VULKAN,
+      backends,
       ..wgpu::InstanceDescriptor::new_without_display_handle()
     });
 
@@ -321,30 +331,26 @@ fn require_vulkan_adapter()
     power_preference: wgpu::PowerPreference::HighPerformance,
     compatible_surface: None,
     force_fallback_adapter: false,
-  }))?;
+  })).context(format!("Failed to find a suitable {rb} adapter"))?;
   let info = adapter.get_info();
   tracing::info!(
     ?info,
-    "Vulkan adapter selected"
+    backend = rb,
+    "Graphics adapter selected"
   );
   Ok(())
 }
 
+#[cfg(unix)]
 fn configure_unix_backend_env(
   cfg: &RootConfig,
   x11: bool
 ) -> anyhow::Result<()> {
-  // Rust 2024: mutating process
-  // environment is `unsafe` because it
-  // can violate invariants when other
-  // threads read environment variables
-  // concurrently. We do this at startup
-  // before spinning up any engine
-  // threads.
+  let rb = cfg.render_backend();
   unsafe {
     std::env::set_var(
       "WGPU_BACKEND",
-      "vulkan"
+      rb
     );
   }
 
@@ -378,6 +384,7 @@ fn configure_unix_backend_env(
   Ok(())
 }
 
+#[cfg(unix)]
 fn preflight_display_env(
   ub: &str
 ) -> anyhow::Result<()> {
