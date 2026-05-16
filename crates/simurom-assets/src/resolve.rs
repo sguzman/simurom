@@ -253,6 +253,58 @@ fn asset_key(
   }
 }
 
+pub fn strip_prefix_robust_opt(
+  path: &std::path::Path,
+  prefix: &std::path::Path
+) -> Option<std::path::PathBuf> {
+  if let Ok(rel) =
+    path.strip_prefix(prefix)
+  {
+    return Some(rel.to_path_buf());
+  }
+
+  let path_str = path
+    .to_string_lossy()
+    .replace('\\', "/");
+  let prefix_str = prefix
+    .to_string_lossy()
+    .replace('\\', "/");
+
+  let clean_path = path_str
+    .strip_prefix("//?/")
+    .unwrap_or(&path_str);
+  let clean_prefix = prefix_str
+    .strip_prefix("//?/")
+    .unwrap_or(&prefix_str);
+
+  if clean_path
+    .to_lowercase()
+    .starts_with(
+      &clean_prefix.to_lowercase()
+    )
+  {
+    let rel_str =
+      &clean_path[clean_prefix.len()..];
+    let rel_str =
+      rel_str.trim_start_matches('/');
+    return Some(
+      std::path::PathBuf::from(rel_str)
+    );
+  }
+
+  None
+}
+
+pub fn strip_prefix_robust(
+  path: &std::path::Path,
+  prefix: &std::path::Path
+) -> std::path::PathBuf {
+  strip_prefix_robust_opt(path, prefix)
+    .unwrap_or_else(|| {
+      path.to_path_buf()
+    })
+}
+
 #[cfg(feature = "bevy")]
 pub mod bevy_load {
   use std::path::Path;
@@ -291,9 +343,10 @@ pub mod bevy_load {
     let abs = resolve_asset_path_cfg(
       cfg, root, image
     )?;
-    let rel = abs
-      .strip_prefix(root)
-      .unwrap_or(&abs)
+    let rel =
+      super::strip_prefix_robust(
+        &abs, root
+      )
       .to_string_lossy()
       .replace('\\', "/");
     Ok(assets.load(rel))
@@ -315,9 +368,10 @@ pub mod bevy_load {
     let abs = resolve_asset_path_cfg(
       cfg, root, font
     )?;
-    let rel = abs
-      .strip_prefix(root)
-      .unwrap_or(&abs)
+    let rel =
+      super::strip_prefix_robust(
+        &abs, root
+      )
       .to_string_lossy()
       .replace('\\', "/");
     Ok(assets.load(rel))
@@ -340,10 +394,11 @@ pub mod bevy_load {
     let resolved = resolve_cached(
       cache, cfg, root, image
     )?;
-    let rel = resolved
-      .abs
-      .strip_prefix(root)
-      .unwrap_or(&resolved.abs)
+    let rel =
+      super::strip_prefix_robust(
+        &resolved.abs,
+        root
+      )
       .to_string_lossy()
       .replace('\\', "/");
     Ok(assets.load(rel))
@@ -366,10 +421,11 @@ pub mod bevy_load {
     let resolved = resolve_cached(
       cache, cfg, root, font
     )?;
-    let rel = resolved
-      .abs
-      .strip_prefix(root)
-      .unwrap_or(&resolved.abs)
+    let rel =
+      super::strip_prefix_robust(
+        &resolved.abs,
+        root
+      )
       .to_string_lossy()
       .replace('\\', "/");
     Ok(assets.load(rel))
@@ -418,9 +474,10 @@ pub mod bevy_load {
           source
         }
       })?;
-    let rel = abs
-      .strip_prefix(root)
-      .unwrap_or(&abs)
+    let rel =
+      super::strip_prefix_robust(
+        &abs, root
+      )
       .to_string_lossy()
       .replace('\\', "/");
     Ok(assets.load(rel))
@@ -457,9 +514,10 @@ pub mod bevy_load {
         )
       );
     }
-    let rel = abs
-      .strip_prefix(root)
-      .unwrap_or(&abs)
+    let rel =
+      super::strip_prefix_robust(
+        &abs, root
+      )
       .to_string_lossy()
       .replace('\\', "/");
     Ok(assets.load(rel))

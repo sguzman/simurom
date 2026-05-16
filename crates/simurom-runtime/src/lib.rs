@@ -1862,10 +1862,25 @@ pub fn lookup_entities<'a>(
 #[instrument(level = "info", skip_all)]
 fn reset_scene_system(
   mut commands: Commands,
-  spawned: Res<SpawnedEntities>
+  spawned: Res<SpawnedEntities>,
+  cameras: Query<Entity, With<Camera>>,
+  popups: Query<
+    Entity,
+    With<interaction::PopupText>
+  >
 ) {
   for e in &spawned.0 {
-    commands.entity(*e).despawn();
+    if let Ok(mut entity) =
+      commands.get_entity(*e)
+    {
+      entity.despawn();
+    }
+  }
+  for camera in cameras.iter() {
+    commands.entity(camera).despawn();
+  }
+  for popup in popups.iter() {
+    commands.entity(popup).despawn();
   }
 }
 
@@ -2065,9 +2080,7 @@ pub fn hot_reload_system(
                   shader,
                 )
               {
-                let rel = abs
-                  .strip_prefix(&ar.0)
-                  .unwrap_or(&abs)
+                let rel = simurom_assets::resolve::strip_prefix_robust(&abs, &ar.0)
                   .to_string_lossy()
                   .to_string();
                 asset_server.reload(rel);
@@ -2104,8 +2117,8 @@ pub fn hot_reload_system(
       {
         let mut reloaded: usize = 0;
         for abs in &changed_paths {
-          if let Ok(rel) =
-            abs.strip_prefix(&ar.0)
+          if let Some(rel) =
+            simurom_assets::resolve::strip_prefix_robust_opt(abs, &ar.0)
           {
             let rel = rel
               .to_string_lossy()
