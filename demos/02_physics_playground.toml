@@ -1,110 +1,112 @@
+[scene]
 schema_version = "0.1"
 
-[resolution]
+[scene.resolution]
 width = 800
 height = 600
 
-[camera]
+[scene.camera]
 x = 0.0
 y = 0.0
 zoom = 1.0
 clear_color = { r = 0.2, g = 0.2, b = 0.2 }
 
-[simulation]
+[scene.simulation]
 gravity = [0.0, -980.0]
 time_scale = 1.0
 
-[[entities]]
+[[scene.entities]]
 id = "floor"
-[entities.transform]
+[scene.entities.transform]
 x = 0.0
 y = -250.0
 z = 0.5
-[entities.shape]
+[scene.entities.shape]
 kind = "rect"
 width = 600.0
 height = 40.0
 color = { r = 0.3, g = 0.8, b = 0.3 }
-[entities.physics]
+[scene.entities.physics]
 body_type = "fixed"
 friction = 0.8
 restitution = 0.4
-[entities.collider]
+[scene.entities.collider]
 kind = "rect"
 size = [600.0, 40.0]
 
-[[entities]]
+[[scene.entities]]
 id = "wall_left"
-[entities.transform]
+[scene.entities.transform]
 x = -320.0
 y = 0.0
 z = 0.5
-[entities.shape]
+[scene.entities.shape]
 kind = "rect"
 width = 40.0
 height = 540.0
 color = { r = 0.3, g = 0.8, b = 0.3 }
-[entities.physics]
+[scene.entities.physics]
 body_type = "fixed"
 friction = 0.8
 restitution = 0.4
-[entities.collider]
+[scene.entities.collider]
 kind = "rect"
 size = [40.0, 540.0]
 
-[[entities]]
+[[scene.entities]]
 id = "wall_right"
-[entities.transform]
+[scene.entities.transform]
 x = 320.0
 y = 0.0
 z = 0.5
-[entities.shape]
+[scene.entities.shape]
 kind = "rect"
 width = 40.0
 height = 540.0
 color = { r = 0.3, g = 0.8, b = 0.3 }
-[entities.physics]
+[scene.entities.physics]
 body_type = "fixed"
 friction = 0.8
 restitution = 0.4
-[entities.collider]
+[scene.entities.collider]
 kind = "rect"
 size = [40.0, 540.0]
 
-[[entities]]
+[[scene.entities]]
 id = "box_1"
-[entities.transform]
+[scene.entities.transform]
 x = -50.0
 y = 200.0
 z = 1.0
 rotation = 0.5
-[entities.shape]
+[scene.entities.shape]
 kind = "rect"
 width = 50.0
 height = 50.0
 color = { r = 0.9, g = 0.2, b = 0.2 }
-[entities.physics]
+[scene.entities.physics]
 body_type = "dynamic"
 mass = 5.0
 restitution = 0.6
-[entities.collider]
+[scene.entities.collider]
 kind = "rect"
 size = [50.0, 50.0]
 
-[[entities]]
+[[scene.entities]]
 id = "ball_1"
-[entities.transform]
+[scene.entities.transform]
 x = 50.0
 y = 250.0
 z = 1.0
-[entities.shape]
+[scene.entities.shape]
 kind = "circle"
 radius = 30.0
 color = { r = 0.2, g = 0.5, b = 0.9 }
-[entities.physics]
+[scene.entities.physics]
 body_type = "dynamic"
 mass = 3.0
 restitution = 0.8
-[entities.collider]
+[scene.entities.collider]
 kind = "circle"
 radius = 30.0
+

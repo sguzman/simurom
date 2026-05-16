@@ -1,47 +1,49 @@
+[scene]
 schema_version = "0.1"
 
-[resolution]
+[scene.resolution]
 width = 800
 height = 600
 
-[camera]
+[scene.camera]
 x = 0.0
 y = 0.0
 zoom = 1.0
 clear_color = { r = 0.1, g = 0.15, b = 0.2 }
 
-[[entities]]
+[[scene.entities]]
 id = "greeting"
-[entities.transform]
+[scene.entities.transform]
 x = 0.0
 y = 100.0
 z = 1.0
-[entities.text]
+[scene.entities.text]
 value = "Hello, Flatfekt!"
 size = 48.0
 color = { r = 1.0, g = 0.9, b = 0.4 }
 anchor = "center"
 align = "center"
 
-[[entities]]
+[[scene.entities]]
 id = "platform"
-[entities.transform]
+[scene.entities.transform]
 x = 0.0
 y = -100.0
 z = 0.5
-[entities.shape]
+[scene.entities.shape]
 kind = "rect"
 width = 400.0
 height = 50.0
 color = { r = 0.2, g = 0.6, b = 0.8 }
 
-[[entities]]
+[[scene.entities]]
 id = "sun"
-[entities.transform]
+[scene.entities.transform]
 x = 200.0
 y = 150.0
 z = 0.2
-[entities.shape]
+[scene.entities.shape]
 kind = "circle"
 radius = 40.0
 color = { r = 1.0, g = 0.8, b = 0.0 }
+
