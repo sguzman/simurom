@@ -1,0 +1,54 @@
+[scene]
+schema_version = "0.1"
+
+[scene.resolution]
+width = 1280
+height = 720
+
+[scene.camera]
+x = 0.0
+y = 0.0
+zoom = 1.0
+clear_color = { r = 0.02, g = 0.02, b = 0.05 }
+
+[[scene.entities]]
+id = "studio2_logo"
+[scene.entities.transform]
+x = 0.0
+y = 40.0
+z = 1.0
+[scene.entities.sprite]
+image = "mini_game/images/studio2.png"
+width = 300.0
+height = 300.0
+
+[[scene.entities]]
+id = "collab_text"
+[scene.entities.transform]
+x = 0.0
+y = -180.0
+z = 1.5
+[scene.entities.text]
+value = "DEEPMIND ADVANCED CODING"
+size = 28.0
+color = { r = 0.9, g = 0.9, b = 0.95 }
+anchor = "center"
+align = "center"
+
+[[scene.entities]]
+id = "sub_text"
+[scene.entities.transform]
+x = 0.0
+y = -220.0
+z = 1.5
+[scene.entities.text]
+value = "In Association With"
+size = 20.0
+color = { r = 0.5, g = 0.5, b = 0.6 }
+anchor = "center"
+align = "center"
+
+[[scene.timeline]]
+time = 2.0
+action = "transition_scene"
+payload = { path = "demos/mini_game/main_menu.toml" }

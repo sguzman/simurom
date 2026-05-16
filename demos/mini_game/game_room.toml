@@ -1,0 +1,172 @@
+[scene]
+schema_version = "0.1"
+
+[scene.resolution]
+width = 1280
+height = 720
+
+[scene.camera]
+x = 0.0
+y = 0.0
+zoom = 1.0
+clear_color = { r = 0.06, g = 0.07, b = 0.1 }
+
+[scene.interaction]
+[[scene.interaction.actions]]
+action = "move_up"
+keys = ["e"]
+
+[[scene.interaction.actions]]
+action = "move_down"
+keys = ["d"]
+
+[[scene.interaction.actions]]
+action = "move_left"
+keys = ["s"]
+
+[[scene.interaction.actions]]
+action = "move_right"
+keys = ["f"]
+
+[[scene.interaction.actions]]
+action = "interact"
+keys = ["space"]
+
+[[scene.entities]]
+id = "room_floor"
+[scene.entities.transform]
+x = 0.0
+y = 0.0
+z = 0.1
+[scene.entities.sprite]
+image = "mini_game/images/floor.png"
+width = 1000.0
+height = 600.0
+
+[[scene.entities]]
+id = "room_wall_top"
+[scene.entities.transform]
+x = 0.0
+y = 300.0
+z = 0.5
+[scene.entities.shape]
+kind = "rect"
+width = 1000.0
+height = 20.0
+color = { r = 0.2, g = 0.2, b = 0.3 }
+
+[[scene.entities]]
+id = "room_wall_bottom"
+[scene.entities.transform]
+x = 0.0
+y = -300.0
+z = 0.5
+[scene.entities.shape]
+kind = "rect"
+width = 1000.0
+height = 20.0
+color = { r = 0.2, g = 0.2, b = 0.3 }
+
+[[scene.entities]]
+id = "room_wall_left"
+[scene.entities.transform]
+x = -500.0
+y = 0.0
+z = 0.5
+[scene.entities.shape]
+kind = "rect"
+width = 20.0
+height = 600.0
+color = { r = 0.2, g = 0.2, b = 0.3 }
+
+[[scene.entities]]
+id = "room_wall_right"
+[scene.entities.transform]
+x = 500.0
+y = 0.0
+z = 0.5
+[scene.entities.shape]
+kind = "rect"
+width = 20.0
+height = 600.0
+color = { r = 0.2, g = 0.2, b = 0.3 }
+
+# Door A: To Backyard
+[[scene.entities]]
+id = "door_to_backyard"
+[scene.entities.transform]
+x = -250.0
+y = 240.0
+z = 1.0
+[scene.entities.sprite]
+image = "mini_game/images/door.png"
+width = 100.0
+height = 70.0
+[scene.entities.interaction]
+on_click = "transition:demos/mini_game/game_backyard.toml"
+
+[[scene.entities]]
+id = "backyard_door_label"
+[scene.entities.transform]
+x = -250.0
+y = 180.0
+z = 1.5
+[scene.entities.text]
+value = "To Backyard (Space)"
+size = 16.0
+color = { r = 0.2, g = 0.9, b = 0.5 }
+anchor = "center"
+align = "center"
+
+# Door B: To Living Room (Locked)
+[[scene.entities]]
+id = "door_to_living_locked"
+[scene.entities.transform]
+x = 250.0
+y = 240.0
+z = 1.0
+[scene.entities.sprite]
+image = "mini_game/images/door.png"
+width = 100.0
+height = 70.0
+[scene.entities.interaction]
+on_click = "text:Door is locked from the inside. Go via the Backyard first."
+
+[[scene.entities]]
+id = "living_door_label"
+[scene.entities.transform]
+x = 250.0
+y = 180.0
+z = 1.5
+[scene.entities.text]
+value = "To Living Room (Locked)"
+size = 16.0
+color = { r = 0.9, g = 0.3, b = 0.3 }
+anchor = "center"
+align = "center"
+
+[[scene.entities]]
+id = "player_character"
+[scene.entities.transform]
+x = 0.0
+y = -100.0
+z = 2.0
+[scene.entities.sprite]
+image = "mini_game/images/player.png"
+width = 80.0
+height = 80.0
+[scene.entities.agent]
+kind = "player"
+
+[[scene.entities]]
+id = "instructions_banner"
+[scene.entities.transform]
+x = 0.0
+y = -330.0
+z = 1.5
+[scene.entities.text]
+value = "SECTOR 3: CONTROL ROOM — Find a way to the Living Room."
+size = 20.0
+color = { r = 0.8, g = 0.8, b = 0.9 }
+anchor = "center"
+align = "center"

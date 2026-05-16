@@ -150,7 +150,9 @@ impl Plugin for SimuromEffectsPlugin {
   }
 }
 
-#[derive(Resource, Default, Debug, Clone)]
+#[derive(
+  Resource, Default, Debug, Clone,
+)]
 struct ActiveEffectState {
   last_effect_id: Option<String>,
   last_intensity: Option<f32>
@@ -158,17 +160,23 @@ struct ActiveEffectState {
 
 #[instrument(level = "debug", skip_all)]
 fn update_postprocess_material(
-  effects: Option<Res<EffectsConfigRes>>,
+  effects: Option<
+    Res<EffectsConfigRes>
+  >,
   scene: Option<Res<SceneRes>>,
   cfg: Option<Res<ConfigRes>>,
-  assets_root: Option<Res<AssetsRootRes>>,
+  assets_root: Option<
+    Res<AssetsRootRes>
+  >,
   asset_server: Res<AssetServer>,
   mut materials: ResMut<
     Assets<PostProcessMaterial>
   >,
   mut state: ResMut<ActiveEffectState>,
   q_quad: Query<
-    &MeshMaterial2d<PostProcessMaterial>,
+    &MeshMaterial2d<
+      PostProcessMaterial
+    >,
     With<PostProcessQuad>
   >
 ) {
@@ -178,13 +186,14 @@ fn update_postprocess_material(
   if !effects.enabled {
     return;
   }
-  let mat_handle = match q_quad.single() {
-    Ok(h) => h,
-    Err(_) => return,
+  let mat_handle = match q_quad.single()
+  {
+    | Ok(h) => h,
+    | Err(_) => return
   };
-  let Some(mat) = materials.get_mut(
-    &mat_handle.0
-  ) else {
+  let Some(mat) =
+    materials.get_mut(&mat_handle.0)
+  else {
     return;
   };
 
@@ -205,19 +214,20 @@ fn update_postprocess_material(
     .map(|s| s.to_owned());
 
   let mut intensity: Option<f32> = None;
-  let mut shader: Option<Handle<Shader>> =
-    None;
+  let mut shader: Option<
+    Handle<Shader>
+  > = None;
 
   if let (
     Some(scene),
     Some(cfg),
     Some(assets_root),
-    Some(id),
+    Some(id)
   ) = (
     scene.as_deref(),
     cfg.as_deref(),
     assets_root.as_deref(),
-    global_id.as_deref(),
+    global_id.as_deref()
   ) {
     if let Some(list) =
       &scene.0.scene.effects
@@ -234,8 +244,7 @@ fn update_postprocess_material(
             .map(|v| v as f32);
         }
 
-        if let Some(wgsl) =
-          &effect.wgsl
+        if let Some(wgsl) = &effect.wgsl
         {
           shader = simurom_assets::resolve::bevy_load::load_wgsl_shader(
             &asset_server,
@@ -601,12 +610,12 @@ fn apply_camera_targets(
 
     commands
       .spawn((
-      mesh2d,
-      MeshMaterial2d(mat),
-      Transform::from_translation(
-        Vec3::new(0.0, 0.0, 0.0)
-      )
-    ))
+        mesh2d,
+        MeshMaterial2d(mat),
+        Transform::from_translation(
+          Vec3::new(0.0, 0.0, 0.0)
+        )
+      ))
       .insert(PostProcessQuad);
 
     // Second camera renders to window;

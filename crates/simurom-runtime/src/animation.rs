@@ -527,7 +527,9 @@ fn dispatch_event(
         .and_then(|v| v.as_str())
         .map(|s| s.to_owned());
       commands.write_message(
-        crate::SetActiveEffect { id }
+        crate::SetActiveEffect {
+          id
+        }
       );
     }
     | other => {

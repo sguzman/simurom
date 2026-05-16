@@ -11,6 +11,7 @@ use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy_camera::ScalingMode;
 use bevy_mesh::Mesh2d;
+use serde::Serialize;
 use simurom_assets::resolve::{
   AssetCache,
   AssetResolveError,
@@ -28,7 +29,6 @@ use simurom_schema::{
   SceneFile,
   Transform2d
 };
-use serde::Serialize;
 use tracing::instrument;
 
 #[derive(Component, Debug, Clone)]
@@ -291,6 +291,8 @@ impl Plugin for SimuromRuntimePlugin {
       .init_resource::<simulation::SimulationSeed>()
       .init_resource::<simulation::SimRegionRes>()
       .init_resource::<simulation::DeterminismPolicyRes>()
+      .init_resource::<interaction::ActiveActions>()
+      .add_observer(interaction::input_action_observer)
       .add_systems(
         Startup,
         init_timeline_clock
@@ -380,7 +382,9 @@ impl Plugin for SimuromRuntimePlugin {
           simulation::draw_physics_debug_system,
           interaction::input_system,
           interaction::picking_system,
+          interaction::popup_text_system,
           agents::agent_tick_system,
+          agents::player_movement_system,
           agents::scripting_system,
         )
       )
@@ -645,8 +649,6 @@ pub fn run_bevy(
   Ok(())
 }
 
-
-
 #[instrument(level = "info", skip_all)]
 pub fn init_timeline_clock(
   cfg: Res<ConfigRes>,
@@ -803,7 +805,9 @@ fn enforce_duration(
 
 #[instrument(level = "info", skip_all)]
 fn set_active_effect_system(
-  mut events: MessageReader<SetActiveEffect>,
+  mut events: MessageReader<
+    SetActiveEffect
+  >,
   mut scene_res: ResMut<SceneRes>
 ) {
   for ev in events.read() {
@@ -813,8 +817,10 @@ fn set_active_effect_system(
       .map(str::trim)
       .filter(|s| !s.is_empty())
       .map(|s| s.to_owned());
-    scene_res.0.scene.active_effect_id =
-      id.clone();
+    scene_res
+      .0
+      .scene
+      .active_effect_id = id.clone();
     tracing::info!(
       active_effect_id = ?id,
       "set active effect"
@@ -1075,6 +1081,135 @@ fn instantiate_scene(
         .or_default()
         .push(e);
     }
+  }
+
+  // Apply components (agents,
+  // interaction, etc.)
+  for ent_spec in &scene.entities {
+    if let Some(list) =
+      entity_map.0.get(&ent_spec.id)
+    {
+      for &entity in list {
+        let mut e =
+          commands.entity(entity);
+
+        if let Some(interaction) =
+          &ent_spec.interaction
+        {
+          if let Some(on_click) =
+            &interaction.on_click
+          {
+            e.insert(
+              interaction::OnClick(
+                on_click.clone()
+              )
+            );
+          }
+          if interaction
+            .selectable
+            .unwrap_or(false)
+          {
+            e.insert(
+              interaction::Selectable
+            );
+          }
+          if interaction
+            .draggable
+            .unwrap_or(false)
+          {
+            e.insert(
+              interaction::Draggable
+            );
+          }
+        }
+
+        if let Some(agent) =
+          &ent_spec.agent
+        {
+          e.insert(agents::Agent {
+            kind:  agent.kind.clone(),
+            state: "idle".to_string()
+          });
+          if agent.kind == "player" {
+            let speed = agent
+              .params
+              .as_ref()
+              .and_then(|p| {
+                p.get("speed")
+              })
+              .and_then(|v| {
+                v.as_float()
+              })
+              .unwrap_or(200.0)
+              as f32;
+            e.insert(
+              agents::PlayerAgent {
+                speed
+              }
+            );
+          }
+        }
+
+        if let Some(script) =
+          &ent_spec.script
+        {
+          if let Some(on_tick) =
+            &script.on_tick
+          {
+            e.insert(
+              agents::ScriptHook {
+                on_tick: Some(
+                  on_tick.clone()
+                )
+              }
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // Set up ActionMap from scene
+  // interaction spec
+  if let Some(interaction_spec) =
+    &scene.interaction
+  {
+    let mut action_map =
+      interaction::ActionMap::default();
+    for binding in
+      &interaction_spec.actions
+    {
+      let keys = binding
+        .keys
+        .iter()
+        .filter_map(|k| {
+          parse_key_code(k)
+        })
+        .collect();
+      action_map.bindings.insert(
+        binding.action.clone(),
+        keys
+      );
+    }
+    commands
+      .insert_resource(action_map);
+  }
+}
+
+fn parse_key_code(
+  s: &str
+) -> Option<KeyCode> {
+  match s.to_lowercase().as_str() {
+    | "w" => Some(KeyCode::KeyW),
+    | "a" => Some(KeyCode::KeyA),
+    | "s" => Some(KeyCode::KeyS),
+    | "d" => Some(KeyCode::KeyD),
+    | "e" => Some(KeyCode::KeyE),
+    | "f" => Some(KeyCode::KeyF),
+    | "space" => Some(KeyCode::Space),
+    | "enter" => Some(KeyCode::Enter),
+    | "escape" => Some(KeyCode::Escape),
+    | _ => None
   }
 }
 
@@ -2405,5 +2540,3 @@ pub fn snapshot_scene_system(
     }
   }
 }
-
-

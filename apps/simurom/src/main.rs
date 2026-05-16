@@ -170,8 +170,6 @@ fn main() -> anyhow::Result<()> {
   }
 }
 
-
-
 fn load_config_or_fail_fast(
   path: &PathBuf
 ) -> anyhow::Result<RootConfig> {
@@ -315,10 +313,14 @@ fn require_render_adapter(
 ) -> anyhow::Result<()> {
   let rb = cfg.render_backend();
   let backends = match rb {
-    | "vulkan" => wgpu::Backends::VULKAN,
+    | "vulkan" => {
+      wgpu::Backends::VULKAN
+    }
     | "dx12" => wgpu::Backends::DX12,
     | "metal" => wgpu::Backends::METAL,
-    | "auto" | _ => wgpu::Backends::all()
+    | "auto" | _ => {
+      wgpu::Backends::all()
+    }
   };
 
   let instance =

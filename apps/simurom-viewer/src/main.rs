@@ -53,10 +53,8 @@ fn main() -> anyhow::Result<()> {
   let config_path = cli
     .config
     .or_else(|| {
-      std::env::var_os(
-        "SIMUROM_CONFIG"
-      )
-      .map(PathBuf::from)
+      std::env::var_os("SIMUROM_CONFIG")
+        .map(PathBuf::from)
     })
     .unwrap_or_else(
       default_config_path
@@ -144,9 +142,7 @@ fn egui_control_panel(
   cfg: Res<ConfigRes>,
   time: Res<Time>,
   mut commands: Commands,
-  scene: Res<
-    simurom_runtime::SceneRes
-  >,
+  scene: Res<simurom_runtime::SceneRes>,
   agg: Option<Res<AggregateSceneRes>>,
   entity_map: Res<
     simurom_runtime::EntityMap
@@ -686,13 +682,13 @@ fn load_config_or_fail_fast(
     }) if !path.exists() => {
       warn!(path = %path.display(), "config file not found; using built-in defaults");
       Ok(RootConfig {
-        app:        None,
-        logging:    None,
-        platform:   None,
-        render:     None,
-        assets:     None,
-        features:   None,
-        runtime:    None,
+        app:      None,
+        logging:  None,
+        platform: None,
+        render:   None,
+        assets:   None,
+        features: None,
+        runtime:  None,
 
         ui:         None,
         simulation: None

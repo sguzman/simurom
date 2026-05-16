@@ -196,7 +196,6 @@ pub enum DistributionSpec {
   }
 }
 
-
 #[derive(
   schemars::JsonSchema,
   Debug,
@@ -790,27 +789,42 @@ impl Scene {
       self.active_effect_id.as_deref()
     {
       if active.trim().is_empty() {
-        return Err(SceneError::Validate(
-          "scene.active_effect_id must not be empty"
-            .to_owned()
-        ));
+        return Err(
+          SceneError::Validate(
+            "scene.active_effect_id \
+             must not be empty"
+              .to_owned()
+          )
+        );
       }
-      let Some(list) = &self.effects else {
-        return Err(SceneError::Validate(
-          format!(
-            "scene.active_effect_id references {:?} but scene.effects is not defined",
-            active
+      let Some(list) = &self.effects
+      else {
+        return Err(
+          SceneError::Validate(
+            format!(
+              "scene.active_effect_id \
+               references {:?} but \
+               scene.effects is not \
+               defined",
+              active
+            )
           )
-        ));
+        );
       };
-      if !list.iter().any(|e| e.id == active)
+      if !list
+        .iter()
+        .any(|e| e.id == active)
       {
-        return Err(SceneError::Validate(
-          format!(
-            "scene.active_effect_id references unknown effect id {:?}",
-            active
+        return Err(
+          SceneError::Validate(
+            format!(
+              "scene.active_effect_id \
+               references unknown \
+               effect id {:?}",
+              active
+            )
           )
-        ));
+        );
       }
     }
 

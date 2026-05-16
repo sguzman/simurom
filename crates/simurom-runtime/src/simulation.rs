@@ -110,7 +110,6 @@ pub fn init_simulation(
     cfg.simulation_deterministic();
   policy.notes.clear();
 
-
   // 1. Base values from global config
   region.gravity =
     Vec2::new(0.0, -9.81);

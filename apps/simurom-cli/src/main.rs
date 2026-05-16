@@ -135,8 +135,7 @@ enum Commands {
   New { path: PathBuf },
   /// Generate a demo scene (e.g., text,
   /// timeline)
-  Demo { name: String, path: PathBuf },
-
+  Demo { name: String, path: PathBuf }
 }
 
 fn main() -> anyhow::Result<()> {
@@ -147,8 +146,7 @@ fn main() -> anyhow::Result<()> {
     .clone()
     .unwrap_or_else(|| {
       PathBuf::from(
-        ".config/simurom/simurom.\
-         toml"
+        ".config/simurom/simurom.toml"
       )
     });
   let cfg = load_config(&config_path)
@@ -330,7 +328,6 @@ y = 0.0
         path
       );
     }
-
   }
 
   Ok(())

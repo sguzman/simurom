@@ -6,9 +6,9 @@ use simurom_config::RootConfig;
 use simurom_runtime::{
   AssetsRootRes,
   ConfigRes,
-  SimuromRuntimePlugin,
   ScenePathRes,
-  SceneRes
+  SceneRes,
+  SimuromRuntimePlugin
 };
 use simurom_schema::SceneFile;
 

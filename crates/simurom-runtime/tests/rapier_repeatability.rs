@@ -10,9 +10,9 @@ use simurom_runtime::{
   AssetsRootRes,
   ConfigRes,
   EntityMap,
-  SimuromRuntimePlugin,
   ScenePathRes,
-  SceneRes
+  SceneRes,
+  SimuromRuntimePlugin
 };
 use simurom_schema::SceneFile;
 
@@ -78,8 +78,7 @@ playing = true
   app.insert_resource(AssetsRootRes(
     root
   ));
-  app
-    .add_plugins(SimuromRuntimePlugin);
+  app.add_plugins(SimuromRuntimePlugin);
 
   app.world_mut().run_schedule(Startup);
   app

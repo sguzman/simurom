@@ -1,5 +1,5 @@
-use simurom_schema::Scene;
 use schemars::schema_for;
+use simurom_schema::Scene;
 
 fn main() {
   let schema = schema_for!(Scene);

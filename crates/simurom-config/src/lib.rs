@@ -146,8 +146,6 @@ pub struct SimulationConfig {
   pub time_scale:        Option<f32>
 }
 
-
-
 #[derive(
   Debug, Clone, Deserialize, Default,
 )]
@@ -555,8 +553,8 @@ impl RootConfig {
         ConfigError::Validate(format!(
           "unsupported render.backend \
            {:?}; expected \"vulkan\", \
-           \"dx12\", \"metal\", \
-           or \"auto\"",
+           \"dx12\", \"metal\", or \
+           \"auto\"",
           rb
         ))
       );
@@ -717,8 +715,6 @@ impl RootConfig {
       }
     }
 
-
-
     Ok(())
   }
 }
@@ -732,8 +728,6 @@ impl RootConfig {
       .unwrap_or("dev")
   }
 }
-
-
 
 impl RootConfig {
   pub fn render_effects_enabled(
@@ -1099,11 +1093,7 @@ impl RootConfig {
   }
 }
 
-impl RootConfig {
-
-
-
-}
+impl RootConfig {}
 
 impl RootConfig {
   pub fn ui_timeline_wheel_seek_secs(

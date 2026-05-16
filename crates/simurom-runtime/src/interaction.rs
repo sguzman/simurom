@@ -12,6 +12,13 @@ pub struct ActionMap {
     >
 }
 
+#[derive(
+  Resource, Debug, Clone, Default,
+)]
+pub struct ActiveActions(
+  pub std::collections::HashSet<String>
+);
+
 #[derive(Event, Debug, Clone)]
 pub struct InputAction {
   pub name: String
@@ -21,18 +28,145 @@ pub struct InputAction {
 pub fn input_system(
   keyboard: Res<ButtonInput<KeyCode>>,
   action_map: Res<ActionMap>,
+  mut active_actions: ResMut<
+    ActiveActions
+  >,
   mut commands: Commands
 ) {
   for (name, keys) in
     action_map.bindings.iter()
   {
+    let mut is_active = false;
     for key in keys {
+      if keyboard.pressed(*key) {
+        is_active = true;
+      }
       if keyboard.just_pressed(*key) {
         tracing::info!(action = %name, "Input action triggered");
         commands.trigger(InputAction {
           name: name.clone()
         });
       }
+    }
+
+    if is_active {
+      active_actions
+        .0
+        .insert(name.clone());
+    } else {
+      active_actions.0.remove(name);
+    }
+  }
+}
+
+#[derive(
+  Component, Debug, Clone, Default,
+)]
+pub struct PopupText {
+  pub timer: f32
+}
+
+#[instrument(level = "info", skip_all)]
+pub fn input_action_observer(
+  action: On<InputAction>,
+  mut commands: Commands,
+  player_query: Query<
+    &Transform,
+    With<crate::agents::PlayerAgent>
+  >,
+  interact_query: Query<(
+    Entity,
+    &Transform,
+    &OnClick
+  )>
+) {
+  let action_name = &action.name;
+  if action_name
+    .starts_with("transition:")
+  {
+    let path = action_name
+      .strip_prefix("transition:")
+      .unwrap();
+    commands.write_message(
+      crate::TransitionScene(
+        std::path::PathBuf::from(path)
+      )
+    );
+  } else if action_name == "interact" {
+    if let Some(player_tf) =
+      player_query.iter().next()
+    {
+      let player_pos = player_tf
+        .translation
+        .truncate();
+      let mut nearest = None;
+      let mut min_dist = 100.0; // Interaction radius
+
+      for (_entity, tf, on_click) in
+        interact_query.iter()
+      {
+        let dist = tf
+          .translation
+          .truncate()
+          .distance(player_pos);
+        if dist < min_dist {
+          min_dist = dist;
+          nearest =
+            Some(on_click.0.clone());
+        }
+      }
+
+      if let Some(target_action) =
+        nearest
+      {
+        commands.trigger(InputAction {
+          name: target_action
+        });
+      }
+    }
+  } else if action_name
+    .starts_with("text:")
+  {
+    let message = action_name
+      .strip_prefix("text:")
+      .unwrap();
+    tracing::info!(
+      message,
+      "Showing popup text"
+    );
+    // Simple implementation: spawn a UI
+    // text or log it for now
+    commands.spawn((
+      Text2d::new(message),
+      TextFont {
+        font_size: 24.0,
+        ..default()
+      },
+      TextColor(Color::WHITE),
+      Transform::from_translation(
+        Vec3::new(0.0, -250.0, 10.0)
+      ),
+      PopupText {
+        timer: 3.0
+      }
+    ));
+  }
+}
+
+pub fn popup_text_system(
+  mut commands: Commands,
+  time: Res<Time>,
+  mut query: Query<(
+    Entity,
+    &mut PopupText
+  )>
+) {
+  for (entity, mut popup) in
+    query.iter_mut()
+  {
+    popup.timer -= time.delta_secs();
+    if popup.timer <= 0.0 {
+      commands.entity(entity).despawn();
     }
   }
 }
@@ -104,7 +238,6 @@ pub fn picking_system(
           .translation()
           .truncate();
         // Simple radius-based picking
-        // stub
         if world_pos.distance(pos)
           < 50.0
         {
