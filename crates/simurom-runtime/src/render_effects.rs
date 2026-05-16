@@ -505,11 +505,15 @@ fn apply_camera_targets(
   // renders into the offscreen image.
   for (e, cam) in cameras.iter() {
     if cam.order == 0 {
-      commands.entity(e).insert(
-        RenderTarget::Image(
-          rtt.image.clone().into()
-        )
-      );
+      if let Ok(mut entity_cmds) =
+        commands.get_entity(e)
+      {
+        entity_cmds.insert(
+          RenderTarget::Image(
+            rtt.image.clone().into()
+          )
+        );
+      }
     }
   }
 

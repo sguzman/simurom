@@ -143,7 +143,11 @@ pub fn input_action_observer(
     // overlap/stack!
     for entity in existing_popups.iter()
     {
-      commands.entity(entity).despawn();
+      if let Ok(mut ent_cmds) =
+        commands.get_entity(entity)
+      {
+        ent_cmds.despawn();
+      }
     }
     // Simple implementation: spawn a UI
     // text or log it for now
@@ -177,7 +181,11 @@ pub fn popup_text_system(
   {
     popup.timer -= time.delta_secs();
     if popup.timer <= 0.0 {
-      commands.entity(entity).despawn();
+      if let Ok(mut ent_cmds) =
+        commands.get_entity(entity)
+      {
+        ent_cmds.despawn();
+      }
     }
   }
 }

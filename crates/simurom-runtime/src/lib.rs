@@ -1877,10 +1877,18 @@ fn reset_scene_system(
     }
   }
   for camera in cameras.iter() {
-    commands.entity(camera).despawn();
+    if let Ok(mut entity) =
+      commands.get_entity(camera)
+    {
+      entity.despawn();
+    }
   }
   for popup in popups.iter() {
-    commands.entity(popup).despawn();
+    if let Ok(mut entity) =
+      commands.get_entity(popup)
+    {
+      entity.despawn();
+    }
   }
 }
 

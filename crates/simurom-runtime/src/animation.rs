@@ -506,15 +506,15 @@ fn dispatch_event(
           entity_map.0.get(target)
         {
           for ent in list {
-            commands.entity(*ent).remove::<
-              TransformTween
-            >();
-            commands
-              .entity(*ent)
-              .remove::<ColorTween>();
-            commands
-              .entity(*ent)
-              .remove::<FadeTween>();
+            if let Ok(mut entity_cmds) =
+              commands.get_entity(*ent)
+            {
+              entity_cmds.remove::<TransformTween>();
+              entity_cmds
+                .remove::<ColorTween>();
+              entity_cmds
+                .remove::<FadeTween>();
+            }
           }
         }
       }
@@ -591,18 +591,22 @@ fn start_transform_tween(
   let start = start_transform
     .cloned()
     .unwrap_or_default();
-  commands.entity(ent).insert(
-    TransformTween {
-      start_time,
-      duration: duration.max(0.0001),
-      start_transform: start,
-      end_transform:
-        Transform::from_translation(
-          Vec3::new(x, y, z)
-        ),
-      easing
-    }
-  );
+  if let Ok(mut entity_cmds) =
+    commands.get_entity(ent)
+  {
+    entity_cmds.insert(
+      TransformTween {
+        start_time,
+        duration: duration.max(0.0001),
+        start_transform: start,
+        end_transform:
+          Transform::from_translation(
+            Vec3::new(x, y, z)
+          ),
+        easing
+      }
+    );
+  }
 }
 
 fn parse_easing(
