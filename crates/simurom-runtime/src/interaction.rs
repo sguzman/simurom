@@ -78,7 +78,11 @@ pub fn input_action_observer(
     Entity,
     &Transform,
     &OnClick
-  )>
+  )>,
+  existing_popups: Query<
+    Entity,
+    With<PopupText>
+  >
 ) {
   let action_name = &action.name;
   if action_name
@@ -134,6 +138,13 @@ pub fn input_action_observer(
       message,
       "Showing popup text"
     );
+    // Despawn any existing popup text
+    // entities so they never
+    // overlap/stack!
+    for entity in existing_popups.iter()
+    {
+      commands.entity(entity).despawn();
+    }
     // Simple implementation: spawn a UI
     // text or log it for now
     commands.spawn((
@@ -147,7 +158,7 @@ pub fn input_action_observer(
         Vec3::new(0.0, -250.0, 10.0)
       ),
       PopupText {
-        timer: 3.0
+        timer: 3.5
       }
     ));
   }

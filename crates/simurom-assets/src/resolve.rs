@@ -295,7 +295,7 @@ pub mod bevy_load {
       .strip_prefix(root)
       .unwrap_or(&abs)
       .to_string_lossy()
-      .to_string();
+      .replace('\\', "/");
     Ok(assets.load(rel))
   }
 
@@ -319,7 +319,7 @@ pub mod bevy_load {
       .strip_prefix(root)
       .unwrap_or(&abs)
       .to_string_lossy()
-      .to_string();
+      .replace('\\', "/");
     Ok(assets.load(rel))
   }
 
@@ -345,7 +345,7 @@ pub mod bevy_load {
       .strip_prefix(root)
       .unwrap_or(&resolved.abs)
       .to_string_lossy()
-      .to_string();
+      .replace('\\', "/");
     Ok(assets.load(rel))
   }
 
@@ -371,7 +371,7 @@ pub mod bevy_load {
       .strip_prefix(root)
       .unwrap_or(&resolved.abs)
       .to_string_lossy()
-      .to_string();
+      .replace('\\', "/");
     Ok(assets.load(rel))
   }
 
@@ -422,7 +422,7 @@ pub mod bevy_load {
       .strip_prefix(root)
       .unwrap_or(&abs)
       .to_string_lossy()
-      .to_string();
+      .replace('\\', "/");
     Ok(assets.load(rel))
   }
 
@@ -461,7 +461,7 @@ pub mod bevy_load {
       .strip_prefix(root)
       .unwrap_or(&abs)
       .to_string_lossy()
-      .to_string();
+      .replace('\\', "/");
     Ok(assets.load(rel))
   }
 }
