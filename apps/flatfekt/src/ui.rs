@@ -402,10 +402,7 @@ fn egui_timeline_panel(
             !t.is_empty()
           })
       ));
-      ui.label(format!(
-        "scene has baked: {}",
-        scene.0.scene.baked.is_some()
-      ));
+
     });
   });
 }

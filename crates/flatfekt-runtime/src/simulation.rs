@@ -110,21 +110,6 @@ pub fn init_simulation(
     cfg.simulation_deterministic();
   policy.notes.clear();
 
-  if scene.0.scene.baked.is_some()
-    && cfg
-      .runtime_playback_prefer_baked_over_simulation()
-  {
-    clock.enabled = false;
-    clock.playing = false;
-    tracing::info!(
-      "simulation disabled (baked playback mode)"
-    );
-    policy.enabled = false;
-    policy.notes.push(
-      "disabled (baked playback mode)"
-        .to_owned()
-    );
-  }
 
   // 1. Base values from global config
   region.gravity =

@@ -136,29 +136,7 @@ enum Commands {
   /// Generate a demo scene (e.g., text,
   /// timeline)
   Demo { name: String, path: PathBuf },
-  /// Bake a simulation to a JSON file
-  Bake {
-    path:     PathBuf,
-    output:   PathBuf,
-    #[arg(
-      short,
-      long,
-      default_value = "10.0"
-    )]
-    duration: f32,
-    #[arg(
-      short,
-      long,
-      default_value = "60.0"
-    )]
-    fps:      f32
-  },
-  /// Play a baked simulation artifact
-  PlayBake {
-    /// Path to scene_playback.toml or
-    /// the bake directory
-    path: PathBuf
-  }
+
 }
 
 fn main() -> anyhow::Result<()> {
@@ -352,34 +330,7 @@ y = 0.0
         path
       );
     }
-    | Commands::Bake {
-      path,
-      output,
-      duration,
-      fps
-    } => {
-      let scene_file =
-        load_scene(&path)?;
-      flatfekt_runtime::run_bake(
-        cfg, path, scene_file, output,
-        duration, fps
-      )?;
-    }
-    | Commands::PlayBake {
-      path
-    } => {
-      let mut final_path = path.clone();
-      if final_path.is_dir() {
-        final_path = final_path
-          .join("scene_playback.toml");
-      }
 
-      let scene_file =
-        load_scene(&final_path)?;
-      flatfekt_runtime::run_play_bake(
-        cfg, final_path, scene_file
-      )?;
-    }
   }
 
   Ok(())

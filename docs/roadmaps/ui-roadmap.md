@@ -32,8 +32,8 @@ Own interface around the scene: HUD, inspector panels, debug overlays, menus, ti
 - [x] Add play/pause/step controls for timeline playback
 - [x] Add timeline scrubber and current time display
   - [x] Provide scrubber UI in `flatfekt-viewer`
-  - [x] Provide scrubber UI in `flatfekt` (including `play-bake`)
-  - [x] Update scrubber to apply frames while paused (baked playback seeks must redraw)
+  - [x] Provide scrubber UI in `flatfekt`
+  - [x] Update scrubber to apply frames while paused
   - [x] Add seek-to-start / seek-to-end buttons
   - [x] Add mousewheel seek on scrubber hover (Ctrl+wheel adjusts seek step)
 - [x] Add aggregate playlist panel (jump buttons) and dual timelines (global + per-scene) when stitching is enabled

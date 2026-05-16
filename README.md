@@ -1,8 +1,8 @@
 # flatfekt
 
-`flatfekt` is a Rust workspace for a TOML-driven 2D Bevy scene runner and simulation environment. Scenes, playback, simulation, and export inputs are declared in TOML; engine behavior, feature flags, limits, paths, and operational policy are centralized in a control-pane config.
+`flatfekt` is a Rust workspace for a TOML-driven 2D Bevy scene runner and dedicated video game environment. Scenes, playback, simulation, and inputs are declared in TOML; engine behavior, feature flags, limits, paths, and operational policy are centralized in a control-pane config.
 
-The repository is organized as a reusable engine workspace rather than a single app crate. The runtime is intended to support interactive playback, deterministic-ish timeline stepping, baked simulation playback, scene stitching, and export workflows from the same scene model.
+The repository is organized as a reusable engine workspace rather than a single app crate. The runtime is intended to support interactive playback and deterministic-ish timeline stepping from the same scene model.
 
 ## Project constraints
 
@@ -10,23 +10,23 @@ The repository is organized as a reusable engine workspace rather than a single 
 - Project policy and tunables live in `.config/flatfekt/flatfekt.toml`.
 - Wayland is the default Unix graphics environment.
 - Vulkan is required; GUI apps fail fast if no Vulkan adapter is available.
-- Structured logging uses `tracing` across config load, scene load/validation, asset resolution, runtime setup, simulation/timeline, and export boundaries.
+- Structured logging uses `tracing` across config load, scene load/validation, asset resolution, runtime setup, and simulation/timeline.
 - Cache and derived artifacts are stored under `.cache/flatfekt/`.
 
 ## Current workspace shape
 
 ### Apps
 
-- `apps/flatfekt`: main application binary and the workspace default run target. Provides scene validation, GUI playback, bake, baked playback, frame export, MP4 export, and headless timeline tracing.
+- `apps/flatfekt`: main application binary and the workspace default run target. Provides scene validation, GUI playback, and headless timeline tracing.
 - `apps/flatfekt-viewer`: focused GUI viewer binary for opening a configured or explicit scene with egui controls and optional world inspection.
-- `apps/flatfekt-cli`: CLI-oriented utility surface for validate/run/fmt/resolve/new/demo/diff/migrate and basic bake/play-bake flows.
+- `apps/flatfekt-cli`: CLI-oriented utility surface for validate/run/fmt/resolve/new/demo/diff/migrate flows.
 
 ### Engine crates
 
 - `crates/flatfekt-config`: loads and validates the control-pane TOML. This crate is Bevy-free.
 - `crates/flatfekt-schema`: typed scene schema and scene validation. This crate is Bevy-free.
 - `crates/flatfekt-assets`: asset pack, asset resolution, and shader/asset handling support.
-- `crates/flatfekt-runtime`: Bevy runtime orchestration, scene instantiation, timeline, simulation, interaction, aggregate scene playback, bake, and export.
+- `crates/flatfekt-runtime`: Bevy runtime orchestration, scene instantiation, timeline, simulation, interaction, and aggregate scene playback.
 - `crates/flatfekt-workspace-checks`: workspace-level dependency and organization checks.
 
 ### Docs and content
@@ -34,10 +34,10 @@ The repository is organized as a reusable engine workspace rather than a single 
 - `docs/architecture.md`: subsystem map, layering, dependency direction, config policy, and runtime conventions.
 - `docs/platform.md`: platform defaults, especially Wayland and Vulkan.
 - `docs/dependencies.md`: allowed dependency graph and Bevy boundary rules.
-- `docs/roadmaps/`: roadmap axes for core, schema, runtime, rendering, simulation, export, UI, tooling, and related workstreams.
+- `docs/roadmaps/`: roadmap axes for core, schema, runtime, rendering, simulation, UI, tooling, and related workstreams.
 - `docs/tranches/`: tranche files linking implemented work back to roadmap checkboxes.
 - `scenes/`: example and testable scene entrypoints such as `demo.toml`, simulation scenes, shader scenes, and stitched scenes.
-- `assets/`: source assets and shader effects used by scenes and exports.
+- `assets/`: source assets and shader effects used by scenes.
 - `tests/fixtures/`: fixture scenes, config files, and patch files for automated tests.
 
 ## Top-level layout
@@ -49,7 +49,7 @@ The repository is organized as a reusable engine workspace rather than a single 
 ├── scenes/                   # scene TOML entrypoints
 ├── assets/                   # images, shaders, and runtime-loaded assets
 ├── .config/flatfekt/         # control-pane config
-├── .cache/flatfekt/          # logs, bake outputs, exports, and other derived artifacts
+├── .cache/flatfekt/          # logs, and other derived artifacts
 ├── docs/roadmaps/            # roadmap checklists
 ├── docs/tranches/            # tranche records for implemented roadmap work
 ├── tests/fixtures/           # test fixtures for configs, patches, and scenes
@@ -71,11 +71,9 @@ The scene format already has support for:
 - timeline events
 - simulation regions and runtime playback policy
 - interaction/action bindings
-- export-related scene hints
 - generator-driven entity creation
 - post-processing/effect selection
 - stitched playback via `scene.sequence[]`
-- baked playback via `scene.baked`
 
 The default sample scene is [`scenes/demo.toml`](scenes/demo.toml), which is intentionally small and shows the basic TOML shape.
 
@@ -92,10 +90,8 @@ Current config areas include:
 - `features`: egui, inspector, and hot-reload toggles
 - `runtime.timeline`: fixed-dt timeline stepping policy
 - `runtime.hot_reload`: debounce and failure handling
-- `runtime.playback`: baked-vs-simulation policy
 - `assets.hot_reload`: asset watcher behavior
 - `simulation`: backend, determinism, stepping, seed, and play state
-- `export.bake`, `export.frames`, `export.video`: bake/export defaults and output policy
 - `ui.timeline`: scrubber wheel tuning
 
 The sample control pane is [.config/flatfekt/flatfekt.toml](.config/flatfekt/flatfekt.toml).
@@ -107,8 +103,6 @@ The sample control pane is [.config/flatfekt/flatfekt.toml](.config/flatfekt/fla
 - Cache root: `.cache/flatfekt/`
 - Dev log files: `.cache/flatfekt/logs/`
 - Per-scene derived artifacts: `.cache/flatfekt/scene/<scene>/`
-- Bake artifacts: `.cache/flatfekt/scene/<scene>/bakes/<scene_xxhash>/run-<timestamp>-<pid>/`
-- Frame/video export artifacts: `.cache/flatfekt/scene/<scene>/exports/<scene_xxhash>/run-<timestamp>-<pid>/`
 
 In `app.mode = "dev"`, runs emit terminal logs and run-scoped file logs. In `prod`, logging is more conservative.
 
@@ -152,30 +146,6 @@ Use X11 instead of Wayland for a GUI app:
 cargo run -- --x11 run scenes/demo.toml
 ```
 
-Bake a scene into a first-class artifact directory:
-
-```bash
-cargo run -- bake scenes/physics_test.toml
-```
-
-Play a baked artifact:
-
-```bash
-cargo run -- play-bake .cache/flatfekt/scene/physics_test/bakes/<hash>/run-<timestamp>-<pid>/
-```
-
-Export PNG frames from a scene or bake artifact:
-
-```bash
-cargo run -- export-frames scenes/shader_test.toml
-```
-
-Export MP4 video from a scene or bake artifact:
-
-```bash
-cargo run -- export-mp4 scenes/shader_test.toml --out output/shader_test.mp4
-```
-
 Trace a scene timeline headlessly:
 
 ```bash
@@ -194,25 +164,6 @@ cargo run -p flatfekt-cli -- resolve scenes/demo.toml
 
 `flatfekt run <scene>` loads config, enforces the selected Unix backend policy, requires Vulkan, validates the scene, builds the Bevy app, and optionally enables egui or world inspection based on config and scene playback policy.
 
-### Bake and baked playback
-
-`bake` records deterministic playback into a bake artifact containing:
-
-- `bake.json`
-- `scene_playback.toml`
-- packaged assets when enabled
-
-`play-bake` replays the baked artifact with live simulation disabled. This is the preferred path for deterministic export and playback reuse.
-
-### Export
-
-The main app supports:
-
-- `export-frames`: deterministic PNG frame sequence export
-- `export-mp4`: frame export followed by `ffmpeg` encoding
-
-If the input is a scene TOML, Flatfekt bakes first and then exports from baked playback. If the input is already a bake artifact, it exports directly from that artifact.
-
 ### Aggregate scene stitching
 
 The runtime supports stitched playback through `scene.sequence[]`, allowing multiple scene clips to play back-to-back with strict playback validation. The viewer UI includes playlist-aware controls when this mode is active.
@@ -226,7 +177,6 @@ The repo uses structured `tracing` rather than ad hoc console prints. Important 
 - asset root resolution and asset loading
 - runtime construction and scene instantiation
 - timeline and simulation stepping
-- bake and export orchestration
 - hot-reload and patch application
 
 The intent is to keep logs useful for diagnosis without per-frame spam.
@@ -236,7 +186,6 @@ The intent is to keep logs useful for diagnosis without per-frame spam.
 - Wayland is the default Unix graphics environment.
 - X11 is opt-in through `--x11` on GUI binaries.
 - Vulkan is mandatory for GUI runtime surfaces.
-- MP4 export requires `ffmpeg` on `PATH` unless `export.video.ffmpeg_path` points elsewhere.
 
 ## Repository process notes
 
@@ -250,7 +199,5 @@ The intent is to keep logs useful for diagnosis without per-frame spam.
 - [`apps/flatfekt/src/main.rs`](apps/flatfekt/src/main.rs): main binary surface and subcommands
 - [`apps/flatfekt-viewer/src/main.rs`](apps/flatfekt-viewer/src/main.rs): viewer-specific GUI setup
 - [`crates/flatfekt-runtime/src/lib.rs`](crates/flatfekt-runtime/src/lib.rs): runtime orchestration and app construction
-- [`crates/flatfekt-runtime/src/bake.rs`](crates/flatfekt-runtime/src/bake.rs): bake artifact creation and playback support
-- [`crates/flatfekt-runtime/src/export.rs`](crates/flatfekt-runtime/src/export.rs): frame/video export pipeline
 - [`crates/flatfekt-schema/src/lib.rs`](crates/flatfekt-schema/src/lib.rs): scene schema and validation model
 - [`crates/flatfekt-config/src/lib.rs`](crates/flatfekt-config/src/lib.rs): control-pane schema and defaults

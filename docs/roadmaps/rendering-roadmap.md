@@ -36,7 +36,7 @@ Own 2D visual output: camera model, layering/z-order, sprites, shapes, materials
 
 ### M3 — offscreen rendering and capture
 - [x] Add render-to-texture support for compositing
-- [x] Add screenshot capture API (used by `export-roadmap.md`)
+- [x] Add screenshot capture API
 
 ## Grouped tasks
 

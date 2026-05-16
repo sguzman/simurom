@@ -5,7 +5,7 @@ Own how assets are referenced from TOML, resolved to paths, loaded/cached, reloa
 
 ## Non-goals
 - Rendering usage details (rendering axis).
-- Export/recording (export axis).
+
 
 ## Dependencies
 - `core-roadmap.md` (config policy, errors, tracing)

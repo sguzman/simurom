@@ -55,7 +55,7 @@ Define the TOML schema that describes scenes as data: entities, components, asse
 ### Format governance
 - [x] Add `schema_version` field and document semantics
 - [x] Add “unknown fields” policy (reject vs allow-with-warning) and implement it
-- [x] Add stable ordering rules for deterministic serialization (if exporting)
+- [x] Add stable ordering rules for deterministic serialization
 
 ### Validation ergonomics
 - [x] Add error paths (e.g., `scene.entities[3].sprite.image`) to all validation failures

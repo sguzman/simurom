@@ -5,7 +5,7 @@ Provide time-based change primitives (tweens, keyframes, timelines) for declarat
 
 ## Non-goals
 - Simulation stepping (belongs to `simulation-roadmap.md`).
-- Export/recording (belongs to `export-roadmap.md`).
+
 
 ## Dependencies
 - `schema-roadmap.md` (timeline event and patch schema)

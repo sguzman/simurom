@@ -27,4 +27,4 @@ Own external control surfaces: keyboard/mouse/gamepad bindings, clickable entiti
 - [x] Add a local IPC option (e.g., TCP/UDS) behind a feature flag with explicit security stance
 
 ### M3 — recording input for replay
-- [x] Add input event recording (timestamped) feeding into `export-roadmap.md` replay
+- [x] Add input event recording (timestamped) for simulation replays

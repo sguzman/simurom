@@ -220,8 +220,7 @@ pub struct AssetsCacheRes(
 pub mod agents;
 pub mod aggregate;
 pub mod animation;
-pub mod bake;
-pub mod export;
+
 pub mod headless_timeline;
 pub mod interaction;
 pub mod rapier_backend;
@@ -301,10 +300,7 @@ impl Plugin for FlatfektRuntimePlugin {
         animation::init_timeline_plan
           .after(init_timeline_clock)
       )
-      .add_systems(
-        Startup,
-        bake::init_baked_simulation
-      )
+
       .add_systems(
         Startup,
         aggregate::init_aggregate_scene
@@ -338,12 +334,7 @@ impl Plugin for FlatfektRuntimePlugin {
           .in_set(FlatfektSet::SimTick)
           .after(animation::process_timeline_events)
       )
-      .add_systems(
-        Update,
-        bake::replay_baked_system
-          .in_set(FlatfektSet::SimTick)
-          .after(timeline_driver)
-      )
+
       .add_systems(
         Startup,
         simulation::init_simulation
@@ -399,7 +390,6 @@ impl Plugin for FlatfektRuntimePlugin {
           .in_set(FlatfektSet::SimTick)
           .after(timeline_driver)
           .before(animation::process_timeline_events)
-          .before(bake::replay_baked_system)
       )
       .add_systems(
         Update,
@@ -655,36 +645,7 @@ pub fn run_bevy(
   Ok(())
 }
 
-pub fn run_play_bake(
-  mut cfg: RootConfig,
-  scene_path: PathBuf,
-  scene: SceneFile
-) -> Result<(), RuntimeError> {
-  // Force playback mode
-  cfg
-    .runtime
-    .get_or_insert_with(
-      Default::default
-    )
-    .playback
-    .get_or_insert_with(
-      Default::default
-    )
-    .prefer_baked_over_simulation =
-    Some(true);
 
-  // Ensure simulation is disabled
-  cfg
-    .simulation
-    .get_or_insert_with(
-      Default::default
-    )
-    .enabled = Some(false);
-
-  build_app(cfg, scene_path, scene)?
-    .run();
-  Ok(())
-}
 
 #[instrument(level = "info", skip_all)]
 pub fn init_timeline_clock(
@@ -695,8 +656,7 @@ pub fn init_timeline_clock(
   let cfg = &cfg.0;
   let pb =
     scene.0.scene.playback.as_ref();
-  let scene_has_bake =
-    scene.0.scene.baked.is_some();
+
   let scene_has_timeline = scene
     .0
     .scene
@@ -705,10 +665,7 @@ pub fn init_timeline_clock(
     .is_some_and(|t| !t.is_empty());
   clock.enabled = cfg
     .runtime_timeline_enabled_opt()
-    .unwrap_or(scene_has_timeline)
-    || (scene_has_bake
-      && cfg
-        .runtime_playback_baked_requires_timeline_clock());
+    .unwrap_or(scene_has_timeline);
   clock.dt_secs = cfg
     .runtime_timeline_fixed_dt_secs();
   clock.max_catchup_steps = cfg
@@ -2449,217 +2406,4 @@ pub fn snapshot_scene_system(
   }
 }
 
-pub fn run_bake(
-  cfg: flatfekt_config::RootConfig,
-  scene_path: std::path::PathBuf,
-  scene_file: flatfekt_schema::SceneFile,
-  output_path: std::path::PathBuf,
-  duration: f32,
-  fps: f32
-) -> anyhow::Result<()> {
-  use bevy::app::ScheduleRunnerPlugin;
 
-  let fps =
-    if fps.is_finite() && fps > 0.0 {
-      fps
-    } else {
-      60.0
-    };
-
-  // Baking is a simulation export. We
-  // intentionally force deterministic
-  // fixed stepping and ensure the
-  // simulation is enabled regardless of
-  // the viewer config.
-  let mut cfg = cfg;
-  {
-    let sim =
-      cfg.simulation.get_or_insert_with(
-        flatfekt_config::SimulationConfig::default,
-      );
-    sim.enabled = Some(true);
-    sim.playing = Some(true);
-    sim.deterministic = Some(true);
-    sim.fixed_dt_secs = Some(1.0 / fps);
-    sim.max_catchup_steps =
-      sim.max_catchup_steps.or(Some(4));
-    sim.time_scale =
-      sim.time_scale.or(Some(1.0));
-  }
-
-  let root = flatfekt_assets::resolve::assets_root(&cfg)
-    .unwrap_or_else(|_| std::path::PathBuf::from("assets"));
-
-  let mut app = App::new();
-  app.add_plugins(MinimalPlugins.set(
-    ScheduleRunnerPlugin::run_loop(
-      std::time::Duration::from_secs_f32(
-        1.0 / fps
-      )
-    )
-  ));
-  app.add_plugins((
-    bevy::transform::TransformPlugin,
-    bevy::asset::AssetPlugin {
-      file_path: root
-        .to_string_lossy()
-        .to_string(),
-      ..default()
-    },
-    bevy::input::InputPlugin,
-    bevy::text::TextPlugin,
-    bevy::gizmos::GizmoPlugin
-  ));
-
-  app.insert_resource(ConfigRes(
-    cfg.clone()
-  ));
-  app.insert_resource(ScenePathRes(
-    scene_path.clone()
-  ));
-  app.insert_resource(SceneRes(
-    scene_file.clone()
-  ));
-  app.insert_resource(AssetsRootRes(
-    root
-  ));
-
-  // Core simulation resources and
-  // message registration.
-  app
-    .configure_sets(Startup, FlatfektSet::Instantiate)
-    .configure_sets(Update, FlatfektSet::SimTick)
-    .init_resource::<SpawnedEntities>()
-    .init_resource::<EntityMap>()
-    .init_resource::<AssetsCacheRes>()
-    .init_resource::<TimelineClock>()
-    .init_resource::<simulation::SimulationClock>()
-    .init_resource::<simulation::SimulationSeed>()
-    .init_resource::<simulation::SimRegionRes>()
-    .init_resource::<animation::TimelinePlan>()
-    .init_resource::<simulation::DeterminismPolicyRes>()
-    .add_message::<ResetScene>()
-    .add_message::<ApplyPatch>()
-    .add_message::<TransitionScene>()
-    .add_message::<SnapshotScene>()
-    .add_message::<RequestScreenshot>()
-    .add_message::<SeekTimeline>()
-    .add_message::<simulation::SimTick>()
-    .add_message::<bevy::app::AppExit>()
-    .init_asset::<ColorMaterial>();
-
-  // Add simulation and scene management
-  // systems.
-  app.add_systems(
-    Startup,
-    simulation::init_simulation
-  );
-  app.add_systems(
-    Startup,
-    (
-      init_timeline_clock,
-      bake::instantiate_scene_headless_for_bake
-        .in_set(FlatfektSet::Instantiate)
-        .after(init_timeline_clock),
-    )
-  );
-
-  app.add_systems(
-    Update,
-    simulation::simulation_driver
-      .in_set(FlatfektSet::SimTick)
-  );
-
-  app.add_systems(
-    Update,
-    (
-      simulation::gravity_system,
-      simulation::bounds_collision_system,
-      simulation::entity_collision_system,
-      simulation::particle_system_tick,
-      simulation::grid_tick,
-    )
-      .in_set(FlatfektSet::SimTick)
-      .after(simulation::simulation_driver)
-  );
-
-  // Determine bake paths
-  let (
-    bake_json_path,
-    scene_playback_path
-  ) = if output_path
-    .extension()
-    .is_some()
-  {
-    // Looks like a single file output
-    (
-      output_path.clone(),
-      output_path
-        .with_extension("toml")
-    )
-  } else {
-    // Looks like a directory output
-    let _ = std::fs::create_dir_all(
-      &output_path
-    );
-    (
-      output_path.join("bake.json"),
-      output_path
-        .join("scene_playback.toml")
-    )
-  };
-
-  let playback = bake::BakePlayback {
-    fps,
-    dt_secs: 1.0 / fps,
-    duration_secs: duration,
-    loop_mode: "stop".to_owned(),
-    end_behavior: "stop".to_owned()
-  };
-
-  let meta = bake::BakeMeta {
-    created_unix_secs:
-      std::time::SystemTime::now()
-        .duration_since(
-          std::time::UNIX_EPOCH
-        )
-        .unwrap_or_default()
-        .as_secs(),
-    tool:                  "flatfekt"
-      .to_owned(),
-    tool_version:          env!(
-      "CARGO_PKG_VERSION"
-    )
-    .to_owned(),
-    source_scene_path:     scene_path
-      .display()
-      .to_string(),
-    source_scene_xxhash64: "0"
-      .to_owned() /* TODO: compute hash if needed */
-  };
-
-  app.insert_resource(bake::BakeSettings {
-    bake_json_path,
-    scene_playback_path,
-    source_scene: scene_file.clone(),
-    playback,
-    meta,
-    assets: Vec::new(),
-    assets_root: flatfekt_assets::resolve::assets_root(&cfg).unwrap_or_default(),
-  });
-
-  // Bake recording and auto-exit logic.
-  app.init_resource::<bake::BakeRecorder>();
-  app.add_systems(
-    Update,
-    (
-      bake::bake_recording_system
-        .after(simulation::entity_collision_system),
-      bake::exit_and_save_on_duration
-        .after(bake::bake_recording_system),
-    )
-  );
-
-  app.run();
-  Ok(())
-}

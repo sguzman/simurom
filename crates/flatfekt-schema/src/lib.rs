@@ -147,10 +147,8 @@ pub struct Scene {
   pub simulation: Option<SimRegionSpec>,
   pub interaction:
     Option<InteractionSpec>,
-  pub export: Option<ExportSpec>,
   pub generators:
     Option<Vec<GeneratorSpec>>,
-  pub baked: Option<std::path::PathBuf>,
   #[serde(default)]
   pub entities:         Vec<EntitySpec>
 }
@@ -198,33 +196,6 @@ pub enum DistributionSpec {
   }
 }
 
-#[derive(
-  schemars::JsonSchema,
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-)]
-#[serde(deny_unknown_fields)]
-pub struct ExportSpec {
-  pub output_dir:
-    Option<std::path::PathBuf>,
-  pub screenshot: Option<bool>,
-  pub recording:  Option<RecordingSpec>
-}
-
-#[derive(
-  schemars::JsonSchema,
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-)]
-#[serde(deny_unknown_fields)]
-pub struct RecordingSpec {
-  pub fps:      u32,
-  pub duration: f32
-}
 
 #[derive(
   schemars::JsonSchema,

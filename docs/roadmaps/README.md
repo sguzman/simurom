@@ -1,6 +1,6 @@
 # Roadmaps
 
-This directory contains **15 orthogonal capability roadmaps** (feature axes). Each roadmap is:
+This directory contains **14 orthogonal capability roadmaps** (feature axes). Each roadmap is:
 
 - Concrete and implementation-verifiable (every actionable item is a checkbox).
 - Kept in sync with the repository as work lands (items are checked off, partial work is split).
@@ -22,4 +22,4 @@ Canonical axes:
 - `scripting-roadmap.md`
 - `tooling-roadmap.md`
 - `testing-roadmap.md`
-- `export-roadmap.md`
+

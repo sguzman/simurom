@@ -178,10 +178,9 @@ fn update_postprocess_material(
   if !effects.enabled {
     return;
   }
-  let Ok(mat_handle) =
-    q_quad.get_single()
-  else {
-    return;
+  let mat_handle = match q_quad.single() {
+    Ok(h) => h,
+    Err(_) => return,
   };
   let Some(mat) = materials.get_mut(
     &mat_handle.0

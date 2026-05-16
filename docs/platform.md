@@ -11,7 +11,7 @@ This project **requires Vulkan** as the graphics backend and will fail fast at s
 This assumption informs:
 
 - windowing and presentation defaults
-- capture/export plumbing (where applicable)
+
 - platform-specific notes and troubleshooting guidance
 
 If/when other environments are supported (e.g., X11), they will be explicitly documented as alternatives rather than implied defaults.
