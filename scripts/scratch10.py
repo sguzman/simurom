@@ -1,7 +1,7 @@
 import sys
 
 content = """
-use flatfekt_config::ConfigRes;
+use simurom_config::ConfigRes;
 
 #[derive(Message, Clone, Debug)]
 pub struct SnapshotScene;
@@ -14,7 +14,7 @@ pub fn snapshot_scene_system(
 ) {
   for _ in events.read() {
     let scene_name = scene_path.0.file_stem().and_then(|s| s.to_str()).unwrap_or("unknown");
-    let snapshot_dir = std::path::PathBuf::from(".cache").join("flatfekt").join("scene").join(scene_name);
+    let snapshot_dir = std::path::PathBuf::from(".cache").join("simurom").join("scene").join(scene_name);
     
     if let Err(e) = std::fs::create_dir_all(&snapshot_dir) {
       tracing::error!("Failed to create snapshot directory: {}", e);
@@ -36,10 +36,10 @@ pub fn snapshot_scene_system(
 }
 """
 
-with open('crates/flatfekt-runtime/src/lib.rs', 'r') as f:
+with open('crates/simurom-runtime/src/lib.rs', 'r') as f:
     lines = f.readlines()
 
 lines.append(content)
 
-with open('crates/flatfekt-runtime/src/lib.rs', 'w') as f:
+with open('crates/simurom-runtime/src/lib.rs', 'w') as f:
     f.writelines(lines)

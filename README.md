@@ -1,33 +1,33 @@
-# flatfekt
+# simurom
 
-`flatfekt` is a Rust workspace for a TOML-driven 2D Bevy scene runner and dedicated video game environment. Scenes, playback, simulation, and inputs are declared in TOML; engine behavior, feature flags, limits, paths, and operational policy are centralized in a control-pane config.
+`simurom` is a Rust workspace for a TOML-driven 2D Bevy scene runner and dedicated video game environment. Scenes, playback, simulation, and inputs are declared in TOML; engine behavior, feature flags, limits, paths, and operational policy are centralized in a control-pane config.
 
 The repository is organized as a reusable engine workspace rather than a single app crate. The runtime is intended to support interactive playback and deterministic-ish timeline stepping from the same scene model.
 
 ## Project constraints
 
 - Scene content is TOML-first.
-- Project policy and tunables live in `.config/flatfekt/flatfekt.toml`.
+- Project policy and tunables live in `.config/simurom/simurom.toml`.
 - Wayland is the default Unix graphics environment.
 - Vulkan is required; GUI apps fail fast if no Vulkan adapter is available.
 - Structured logging uses `tracing` across config load, scene load/validation, asset resolution, runtime setup, and simulation/timeline.
-- Cache and derived artifacts are stored under `.cache/flatfekt/`.
+- Cache and derived artifacts are stored under `.cache/simurom/`.
 
 ## Current workspace shape
 
 ### Apps
 
-- `apps/flatfekt`: main application binary and the workspace default run target. Provides scene validation, GUI playback, and headless timeline tracing.
-- `apps/flatfekt-viewer`: focused GUI viewer binary for opening a configured or explicit scene with egui controls and optional world inspection.
-- `apps/flatfekt-cli`: CLI-oriented utility surface for validate/run/fmt/resolve/new/demo/diff/migrate flows.
+- `apps/simurom`: main application binary and the workspace default run target. Provides scene validation, GUI playback, and headless timeline tracing.
+- `apps/simurom-viewer`: focused GUI viewer binary for opening a configured or explicit scene with egui controls and optional world inspection.
+- `apps/simurom-cli`: CLI-oriented utility surface for validate/run/fmt/resolve/new/demo/diff/migrate flows.
 
 ### Engine crates
 
-- `crates/flatfekt-config`: loads and validates the control-pane TOML. This crate is Bevy-free.
-- `crates/flatfekt-schema`: typed scene schema and scene validation. This crate is Bevy-free.
-- `crates/flatfekt-assets`: asset pack, asset resolution, and shader/asset handling support.
-- `crates/flatfekt-runtime`: Bevy runtime orchestration, scene instantiation, timeline, simulation, interaction, and aggregate scene playback.
-- `crates/flatfekt-workspace-checks`: workspace-level dependency and organization checks.
+- `crates/simurom-config`: loads and validates the control-pane TOML. This crate is Bevy-free.
+- `crates/simurom-schema`: typed scene schema and scene validation. This crate is Bevy-free.
+- `crates/simurom-assets`: asset pack, asset resolution, and shader/asset handling support.
+- `crates/simurom-runtime`: Bevy runtime orchestration, scene instantiation, timeline, simulation, interaction, and aggregate scene playback.
+- `crates/simurom-workspace-checks`: workspace-level dependency and organization checks.
 
 ### Docs and content
 
@@ -48,8 +48,8 @@ The repository is organized as a reusable engine workspace rather than a single 
 ├── crates/                   # reusable engine crates
 ├── scenes/                   # scene TOML entrypoints
 ├── assets/                   # images, shaders, and runtime-loaded assets
-├── .config/flatfekt/         # control-pane config
-├── .cache/flatfekt/          # logs, and other derived artifacts
+├── .config/simurom/         # control-pane config
+├── .cache/simurom/          # logs, and other derived artifacts
 ├── docs/roadmaps/            # roadmap checklists
 ├── docs/tranches/            # tranche records for implemented roadmap work
 ├── tests/fixtures/           # test fixtures for configs, patches, and scenes
@@ -59,7 +59,7 @@ The repository is organized as a reusable engine workspace rather than a single 
 
 ## Scene model
 
-Flatfekt currently uses a single TOML file as the scene entrypoint. The schema crate validates the file before the runtime instantiates anything.
+Simurom currently uses a single TOML file as the scene entrypoint. The schema crate validates the file before the runtime instantiates anything.
 
 The scene format already has support for:
 
@@ -79,7 +79,7 @@ The default sample scene is [`scenes/demo.toml`](scenes/demo.toml), which is int
 
 ## Control-pane configuration
 
-The control pane lives at `.config/flatfekt/flatfekt.toml`. The main binaries also honor `FLATFEKT_CONFIG`, and some app surfaces support explicit `--config` overrides.
+The control pane lives at `.config/simurom/simurom.toml`. The main binaries also honor `SIMUROM_CONFIG`, and some app surfaces support explicit `--config` overrides.
 
 Current config areas include:
 
@@ -94,15 +94,15 @@ Current config areas include:
 - `simulation`: backend, determinism, stepping, seed, and play state
 - `ui.timeline`: scrubber wheel tuning
 
-The sample control pane is [.config/flatfekt/flatfekt.toml](.config/flatfekt/flatfekt.toml).
+The sample control pane is [.config/simurom/simurom.toml](.config/simurom/simurom.toml).
 
 ## Operational directories
 
-- Config root: `.config/flatfekt/`
-- Preferred config file: `.config/flatfekt/flatfekt.toml`
-- Cache root: `.cache/flatfekt/`
-- Dev log files: `.cache/flatfekt/logs/`
-- Per-scene derived artifacts: `.cache/flatfekt/scene/<scene>/`
+- Config root: `.config/simurom/`
+- Preferred config file: `.config/simurom/simurom.toml`
+- Cache root: `.cache/simurom/`
+- Dev log files: `.cache/simurom/logs/`
+- Per-scene derived artifacts: `.cache/simurom/scene/<scene>/`
 
 In `app.mode = "dev"`, runs emit terminal logs and run-scoped file logs. In `prod`, logging is more conservative.
 
@@ -118,7 +118,7 @@ cargo clippy --workspace --all-targets
 cargo test --workspace
 ```
 
-The workspace default run target is `apps/flatfekt`, so `cargo run` launches the main app crate.
+The workspace default run target is `apps/simurom`, so `cargo run` launches the main app crate.
 
 ## Common commands
 
@@ -137,7 +137,7 @@ cargo run -- validate scenes/demo.toml
 Run the GUI viewer:
 
 ```bash
-cargo run -p flatfekt-viewer -- --scene scenes/demo.toml
+cargo run -p simurom-viewer -- --scene scenes/demo.toml
 ```
 
 Use X11 instead of Wayland for a GUI app:
@@ -155,14 +155,14 @@ cargo run -- trace-timeline scenes/demo.toml --max-steps 600
 Use the utility CLI surface:
 
 ```bash
-cargo run -p flatfekt-cli -- resolve scenes/demo.toml
+cargo run -p simurom-cli -- resolve scenes/demo.toml
 ```
 
 ## Runtime workflows
 
 ### Interactive scene run
 
-`flatfekt run <scene>` loads config, enforces the selected Unix backend policy, requires Vulkan, validates the scene, builds the Bevy app, and optionally enables egui or world inspection based on config and scene playback policy.
+`simurom run <scene>` loads config, enforces the selected Unix backend policy, requires Vulkan, validates the scene, builds the Bevy app, and optionally enables egui or world inspection based on config and scene playback policy.
 
 ### Aggregate scene stitching
 
@@ -196,8 +196,8 @@ The intent is to keep logs useful for diagnosis without per-frame spam.
 
 ## Good entrypoints for reading the code
 
-- [`apps/flatfekt/src/main.rs`](apps/flatfekt/src/main.rs): main binary surface and subcommands
-- [`apps/flatfekt-viewer/src/main.rs`](apps/flatfekt-viewer/src/main.rs): viewer-specific GUI setup
-- [`crates/flatfekt-runtime/src/lib.rs`](crates/flatfekt-runtime/src/lib.rs): runtime orchestration and app construction
-- [`crates/flatfekt-schema/src/lib.rs`](crates/flatfekt-schema/src/lib.rs): scene schema and validation model
-- [`crates/flatfekt-config/src/lib.rs`](crates/flatfekt-config/src/lib.rs): control-pane schema and defaults
+- [`apps/simurom/src/main.rs`](apps/simurom/src/main.rs): main binary surface and subcommands
+- [`apps/simurom-viewer/src/main.rs`](apps/simurom-viewer/src/main.rs): viewer-specific GUI setup
+- [`crates/simurom-runtime/src/lib.rs`](crates/simurom-runtime/src/lib.rs): runtime orchestration and app construction
+- [`crates/simurom-schema/src/lib.rs`](crates/simurom-schema/src/lib.rs): scene schema and validation model
+- [`crates/simurom-config/src/lib.rs`](crates/simurom-config/src/lib.rs): control-pane schema and defaults

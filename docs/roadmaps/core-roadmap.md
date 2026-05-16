@@ -30,10 +30,10 @@ Define the project constitution: workspace boundaries, dependency rules, determi
 - [x] Create root `docs/architecture.md` with subsystem map and boundaries
 - [x] Add root `AGENTS.md` with contributor/agent operating rules (roadmaps, tranches, config control pane, and build verification)
 - [x] Update `AGENTS.md` to remove assistant commit-message generation (repo owner handles commits/messages)
-- [x] Define a single config entrypoint (`flatfekt.toml`) and lookup rules (cwd, env override)
-  - [x] Support explicit config path override via `FLATFEKT_CONFIG`
-  - [x] Support config file in repository working directory (e.g., `./flatfekt.toml`)
-  - [x] Support default config directory `.config/flatfekt/` (prefer `.config/flatfekt/flatfekt.toml`)
+- [x] Define a single config entrypoint (`simurom.toml`) and lookup rules (cwd, env override)
+  - [x] Support explicit config path override via `SIMUROM_CONFIG`
+  - [x] Support config file in repository working directory (e.g., `./simurom.toml`)
+  - [x] Support default config directory `.config/simurom/` (prefer `.config/simurom/simurom.toml`)
 - [x] Define error-handling rules (use `thiserror` + `anyhow` boundaries; never `unwrap()` in engine paths)
 - [x] Define `tracing` policy (event fields, span boundaries, per-subsystem targets)
 
@@ -54,14 +54,14 @@ Define the project constitution: workspace boundaries, dependency rules, determi
 
 ## Config control-pane policy
 - [x] Define “must be config” vs “may be hardcoded” rules in `docs/architecture.md`
-- [x] Add `flatfekt.toml` sample with comments for all implemented knobs
+- [x] Add `simurom.toml` sample with comments for all implemented knobs
 - [x] Ensure knobs are centralized: no gameplay/scene policy magic numbers outside config without explicit rationale
 
 ## Operational directories and run modes
 - [x] Add `app.mode` config (`dev`|`prod`) and wire it to operational behavior
-- [x] In `dev` mode, write run-scoped timestamped log files under `.cache/flatfekt/logs/` in addition to terminal output
-- [x] Standardize cache directory layout under `.cache/flatfekt/` (central cache root)
-- [x] Create per-scene cache directories under `.cache/flatfekt/scene/<scene>/` for derived artifacts
+- [x] In `dev` mode, write run-scoped timestamped log files under `.cache/simurom/logs/` in addition to terminal output
+- [x] Standardize cache directory layout under `.cache/simurom/` (central cache root)
+- [x] Create per-scene cache directories under `.cache/simurom/scene/<scene>/` for derived artifacts
 
 ## Platform defaults
 - [x] Allow X11 as an opt-in unix backend (`--x11` flag; Wayland remains default)

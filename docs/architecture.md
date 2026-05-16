@@ -19,10 +19,10 @@ Typed project configuration that selects scene entrypoints, asset roots, logging
 
 ## Crate layout
 
-- `crates/flatfekt-config`: control-pane configuration loading and validation (no Bevy)
-- `crates/flatfekt-schema`: scene TOML schema types + validation (no Bevy)
-- `crates/flatfekt-runtime`: runtime orchestration APIs (Bevy integration will live here)
-- `apps/flatfekt-viewer`: reference runner app (loads config + scene and starts the runtime)
+- `crates/simurom-config`: control-pane configuration loading and validation (no Bevy)
+- `crates/simurom-schema`: scene TOML schema types + validation (no Bevy)
+- `crates/simurom-runtime`: runtime orchestration APIs (Bevy integration will live here)
+- `apps/simurom-viewer`: reference runner app (loads config + scene and starts the runtime)
 
 ## Bevy dependency boundary
 - Crates that may depend on Bevy: runtime/rendering/UI “engine” crates and apps.
@@ -79,7 +79,7 @@ All scene values (positions, sizes, radii) are interpreted in **world units** in
 - Logging level/filter are controlled via config and/or environment overrides.
 
 ## Policy: config + scenes are TOML-first
-Scenes and scene-internal state are controlled via TOML. Project behavior, policy, feature flags, and tunables are centralized in `flatfekt.toml` (control pane).
+Scenes and scene-internal state are controlled via TOML. Project behavior, policy, feature flags, and tunables are centralized in `simurom.toml` (control pane).
 
 ## Control pane policy
 

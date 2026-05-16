@@ -1,4 +1,4 @@
-# Flatfekt — agent operating rules
+# Simurom — agent operating rules
 
 This repository is a Rust workspace that builds a TOML-driven 2D Bevy scene runner and simulation environment.
 
@@ -38,10 +38,10 @@ These rules exist to keep the repo organized, buildable, auditable, and roadmap-
 
 Configuration is intentionally centralized and aggressive:
 
-- Project control pane config is located under `.config/flatfekt/` (preferred path: `.config/flatfekt/flatfekt.toml`).
-- Cache root is `.cache/flatfekt/`.
-  - Logs live under `.cache/flatfekt/logs/`.
-  - Per-scene derived artifacts go under `.cache/flatfekt/scene/<scene>/`.
+- Project control pane config is located under `.config/simurom/` (preferred path: `.config/simurom/simurom.toml`).
+- Cache root is `.cache/simurom/`.
+  - Logs live under `.cache/simurom/logs/`.
+  - Per-scene derived artifacts go under `.cache/simurom/scene/<scene>/`.
 
 Rules:
 
@@ -52,7 +52,7 @@ Rules:
 ## Modes and logging
 
 - `app.mode` must support `dev` and `prod`.
-- In `dev` mode, the app writes run-scoped timestamped log files under `.cache/flatfekt/logs/` in addition to terminal logs.
+- In `dev` mode, the app writes run-scoped timestamped log files under `.cache/simurom/logs/` in addition to terminal logs.
 - Use `tracing_subscriber` with structured fields and avoid per-frame spam (prefer spans or sampled logs).
 
 ## Workspace organization expectations

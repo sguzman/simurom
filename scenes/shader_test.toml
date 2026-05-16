@@ -6,8 +6,8 @@ scaling_mode = "window_size"
 
 [[scene.effects]]
 id = "invert"
-wgsl = "flatfekt/shaders/invert.wgsl"
-# glsl = "flatfekt/shaders/grayscale.frag"
+wgsl = "simurom/shaders/invert.wgsl"
+# glsl = "simurom/shaders/grayscale.frag"
 
 [[scene.entities]]
 id = "test_sprite"

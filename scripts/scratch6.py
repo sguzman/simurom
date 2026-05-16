@@ -1,7 +1,7 @@
 import sys
 
 content = """
-use flatfekt_schema::{ScenePatch, EntityPatch, EntitySpec};
+use simurom_schema::{ScenePatch, EntityPatch, EntitySpec};
 
 #[derive(bevy::prelude::Event, Clone, Debug)]
 pub struct ApplyPatch(pub ScenePatch);
@@ -52,5 +52,5 @@ pub fn apply_patch_system(
 }
 """
 
-with open('crates/flatfekt-runtime/src/lib.rs', 'a') as f:
+with open('crates/simurom-runtime/src/lib.rs', 'a') as f:
     f.write(content)

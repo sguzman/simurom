@@ -45,5 +45,5 @@ pub fn hot_reload_system(
 }
 """
 
-with open('crates/flatfekt-runtime/src/lib.rs', 'a') as f:
+with open('crates/simurom-runtime/src/lib.rs', 'a') as f:
     f.write(content)

@@ -2869,136 +2869,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "flatfekt"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "assert_cmd",
- "bevy",
- "bevy-inspector-egui",
- "bevy_egui",
- "clap",
- "flatfekt-config",
- "flatfekt-runtime",
- "flatfekt-schema",
- "pollster",
- "predicates",
- "serde_json",
- "tempfile",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "wgpu 29.0.1",
-]
-
-[[package]]
-name = "flatfekt-assets"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bevy",
- "flatfekt-config",
- "flatfekt-schema",
- "naga 29.0.1",
- "thiserror 2.0.18",
- "tracing",
-]
-
-[[package]]
-name = "flatfekt-cli"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "flatfekt-config",
- "flatfekt-runtime",
- "flatfekt-schema",
- "serde",
- "thiserror 2.0.18",
- "toml",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "flatfekt-config"
-version = "0.1.0"
-dependencies = [
- "serde",
- "thiserror 2.0.18",
- "toml",
- "tracing",
-]
-
-[[package]]
-name = "flatfekt-runtime"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bevy",
- "bevy_camera",
- "bevy_mesh",
- "bevy_rapier2d",
- "bevy_shader",
- "bevy_sprite_render",
- "crossbeam-channel",
- "flatfekt-assets",
- "flatfekt-config",
- "flatfekt-schema",
- "notify",
- "serde",
- "serde_json",
- "sha2",
- "tempfile",
- "thiserror 2.0.18",
- "toml",
- "tracing",
- "xxhash-rust",
-]
-
-[[package]]
-name = "flatfekt-schema"
-version = "0.1.0"
-dependencies = [
- "schemars",
- "serde",
- "serde_json",
- "strsim",
- "thiserror 2.0.18",
- "toml",
- "tracing",
-]
-
-[[package]]
-name = "flatfekt-viewer"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bevy",
- "bevy-inspector-egui",
- "bevy_egui",
- "clap",
- "flatfekt-config",
- "flatfekt-runtime",
- "flatfekt-schema",
- "pollster",
- "toml",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "wgpu 29.0.1",
-]
-
-[[package]]
-name = "flatfekt-workspace-checks"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "cargo_metadata",
-]
-
-[[package]]
 name = "float-cmp"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5870,6 +5740,137 @@ name = "simdutf8"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
+
+[[package]]
+name = "simurom"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "bevy",
+ "bevy-inspector-egui",
+ "bevy_egui",
+ "clap",
+ "pollster",
+ "predicates",
+ "serde_json",
+ "simurom-config",
+ "simurom-runtime",
+ "simurom-schema",
+ "tempfile",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "wgpu 29.0.1",
+]
+
+[[package]]
+name = "simurom-assets"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bevy",
+ "naga 29.0.1",
+ "simurom-config",
+ "simurom-schema",
+ "thiserror 2.0.18",
+ "tracing",
+]
+
+[[package]]
+name = "simurom-cli"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "serde",
+ "simurom-assets",
+ "simurom-config",
+ "simurom-runtime",
+ "simurom-schema",
+ "thiserror 2.0.18",
+ "toml",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "simurom-config"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "thiserror 2.0.18",
+ "toml",
+ "tracing",
+]
+
+[[package]]
+name = "simurom-runtime"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bevy",
+ "bevy_camera",
+ "bevy_mesh",
+ "bevy_rapier2d",
+ "bevy_shader",
+ "bevy_sprite_render",
+ "crossbeam-channel",
+ "notify",
+ "serde",
+ "serde_json",
+ "sha2",
+ "simurom-assets",
+ "simurom-config",
+ "simurom-schema",
+ "tempfile",
+ "thiserror 2.0.18",
+ "toml",
+ "tracing",
+ "xxhash-rust",
+]
+
+[[package]]
+name = "simurom-schema"
+version = "0.1.0"
+dependencies = [
+ "schemars",
+ "serde",
+ "serde_json",
+ "strsim",
+ "thiserror 2.0.18",
+ "toml",
+ "tracing",
+]
+
+[[package]]
+name = "simurom-viewer"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bevy",
+ "bevy-inspector-egui",
+ "bevy_egui",
+ "clap",
+ "pollster",
+ "simurom-config",
+ "simurom-runtime",
+ "simurom-schema",
+ "toml",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "wgpu 29.0.1",
+]
+
+[[package]]
+name = "simurom-workspace-checks"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "cargo_metadata",
+]
 
 [[package]]
 name = "skrifa"

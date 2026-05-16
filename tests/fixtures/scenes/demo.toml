@@ -42,7 +42,7 @@ id = "title"
 tags = ["ui", "text"]
 
 [scene.entities.text]
-value = "flatfekt"
+value = "simurom"
 size = 48.0
 align = "center"
 anchor = "center"

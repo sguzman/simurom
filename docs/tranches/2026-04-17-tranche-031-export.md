@@ -7,6 +7,6 @@
 - [x] Update `export-roadmap.md`.
 
 ## Changes
-- Added `ExportSpec` and `RecordingSpec` to `flatfekt-schema`.
-- Implemented `export.rs` in `flatfekt-runtime`.
+- Added `ExportSpec` and `RecordingSpec` to `simurom-schema`.
+- Implemented `export.rs` in `simurom-runtime`.
 - Registered export module and systems in `lib.rs`.

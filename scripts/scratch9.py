@@ -35,10 +35,10 @@ pub fn scene_transition_system(
 }
 """
 
-with open('crates/flatfekt-runtime/src/lib.rs', 'r') as f:
+with open('crates/simurom-runtime/src/lib.rs', 'r') as f:
     lines = f.readlines()
 
 lines.append(content)
 
-with open('crates/flatfekt-runtime/src/lib.rs', 'w') as f:
+with open('crates/simurom-runtime/src/lib.rs', 'w') as f:
     f.writelines(lines)

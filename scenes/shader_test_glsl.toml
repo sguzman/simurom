@@ -7,7 +7,7 @@ scaling_mode = "window_size"
 
 [[scene.effects]]
 id = "grayscale"
-glsl = "flatfekt/shaders/grayscale.frag"
+glsl = "simurom/shaders/grayscale.frag"
 
 [[scene.entities]]
 id = "test_sprite"

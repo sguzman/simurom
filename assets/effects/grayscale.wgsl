@@ -1,4 +1,4 @@
-// Flatfekt demo postprocess effect: grayscale.
+// Simurom demo postprocess effect: grayscale.
 //
 // This file is intentionally tiny and stable. It is referenced from scene TOML.
 

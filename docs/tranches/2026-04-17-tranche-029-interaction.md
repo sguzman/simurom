@@ -2,13 +2,13 @@
 
 ## Roadmap Items
 - [x] Implement `ActionMap` schema in TOML.
-- [x] Implement input mapping system in `flatfekt-runtime`.
+- [x] Implement input mapping system in `simurom-runtime`.
 - [x] Add built-in actions: quit, reset, pause, step.
 - [x] Implement picking (mouse hit test) for entities.
 - [x] Update `interaction-roadmap.md`.
 
 ## Changes
-- Added `InteractionSpec` and `ActionBinding` to `flatfekt-schema`.
+- Added `InteractionSpec` and `ActionBinding` to `simurom-schema`.
 - Added `EntityInteractionSpec` to `EntitySpec`.
-- Implemented `interaction.rs` in `flatfekt-runtime`.
+- Implemented `interaction.rs` in `simurom-runtime`.
 - Registered interaction systems in `lib.rs`.

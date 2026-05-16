@@ -12,15 +12,15 @@ This project is a Cargo workspace split into **engine crates** (reusable librari
 
 ### Engine crates
 
-- `flatfekt-config` (no Bevy)
+- `simurom-config` (no Bevy)
   - depends on: `serde`, `toml`, `tracing`, `thiserror`
-- `flatfekt-schema` (no Bevy)
+- `simurom-schema` (no Bevy)
   - depends on: `serde`, `toml`, `tracing`, `thiserror`
-- `flatfekt-runtime`
-  - depends on: `flatfekt-config`, `flatfekt-schema`, `tracing`, `thiserror`
+- `simurom-runtime`
+  - depends on: `simurom-config`, `simurom-schema`, `tracing`, `thiserror`
 
 ### Apps
 
-- `flatfekt-viewer`
-  - depends on: `flatfekt-config`, `flatfekt-schema`, `flatfekt-runtime`
+- `simurom-viewer`
+  - depends on: `simurom-config`, `simurom-schema`, `simurom-runtime`
 

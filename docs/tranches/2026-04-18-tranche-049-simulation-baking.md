@@ -8,11 +8,11 @@
 - [x] Add bake subcommand for simulation trajectory export
 
 ## Changes
-- **`flatfekt-schema`**: Added `baked` field to `Scene` struct.
-- **`flatfekt-runtime`**: Created `bake` module with recorder and replay systems. Integrated with `FlatfektRuntimePlugin`. Implemented headless `run_bake` runner.
-- **`flatfekt-cli`**: Added `bake` subcommand and integrated runtime baking logic.
+- **`simurom-schema`**: Added `baked` field to `Scene` struct.
+- **`simurom-runtime`**: Created `bake` module with recorder and replay systems. Integrated with `SimuromRuntimePlugin`. Implemented headless `run_bake` runner.
+- **`simurom-cli`**: Added `bake` subcommand and integrated runtime baking logic.
 
 ## Verification
-- `cargo check -p flatfekt-runtime` — PASSED
-- `cargo check -p flatfekt-cli` — PASSED
+- `cargo check -p simurom-runtime` — PASSED
+- `cargo check -p simurom-cli` — PASSED
 - Manual verification of subcommand registration and parameter parsing.

@@ -1,6 +1,6 @@
 import sys
 
-with open('crates/flatfekt-runtime/src/lib.rs', 'r') as f:
+with open('crates/simurom-runtime/src/lib.rs', 'r') as f:
     lines = f.readlines()
 
 # find ApplyPatch and replace to the end
@@ -65,5 +65,5 @@ pub fn apply_patch_system(
 
 lines.append(content)
 
-with open('crates/flatfekt-runtime/src/lib.rs', 'w') as f:
+with open('crates/simurom-runtime/src/lib.rs', 'w') as f:
     f.writelines(lines)

@@ -1,0 +1,174 @@
+# simurom control-pane configuration
+#
+# This file is intended to centralize operational decisions, tuning knobs, feature flags,
+# and policy choices. Defaults exist, but explicit configuration is preferred.
+
+[app]
+# Optional display name (used for logs / UI labels).
+name = "simurom"
+
+# Operational mode: "dev" or "prod".
+# - dev: extra diagnostics, run-scoped log files, caching conveniences
+# - prod: minimal diagnostics, no per-run file logs by default
+mode = "dev"
+
+# Entrypoint scene file (TOML).
+scene_path = "scenes/demo.toml"
+
+# Root directory for resolving asset paths (images/fonts/etc.).
+assets_dir = "assets"
+
+[platform]
+# Default target graphics environment for this project.
+# Supported values: "wayland" (default) or "x11" (opt-in).
+unix_backend = "wayland"
+
+[render]
+# This project requires Vulkan and fails fast if no Vulkan adapter is available.
+backend = "vulkan"
+target_fps = 60
+
+[render.window]
+# Default window resolution. A scene can override this by specifying:
+# `scene.resolution = { width = ..., height = ... }`
+width = 1280
+height = 720
+
+[render.effects]
+# Enable global post-processing effects and compositing.
+enabled = true
+
+# Select which `scene.effects[].id` is active globally.
+global_effect_id = "invert"
+
+[render.effects.render_to_texture]
+# If enabled, render the scene to an offscreen texture before presenting.
+enabled = true
+
+# Resolution strategy: "window" (recommended) or "fixed" (planned).
+mode = "window"
+
+# Scale factor applied to the target resolution (1.0 = full size).
+scale = 1.0
+
+[logging]
+# One of: trace, debug, info, warn, error
+level = "info"
+
+# Optional: override with a full tracing filter string, e.g.:
+# filter = "info,simurom_runtime=debug,wgpu=warn"
+# filter = "debug"
+
+[features]
+# Enable an embedded control GUI (egui). When enabled, a small panel provides
+# basic playback controls and debug toggles.
+ui_egui = true
+
+# Enable developer inspector surfaces (bevy-inspector-egui). This is still gated
+# by per-scene policy.
+inspector_egui = true
+
+# (planned) hot reload support for config/scene files.
+hot_reload = false
+
+[runtime.timeline]
+# Enable deterministic-ish timeline stepping. When enabled, the runtime advances a
+# `TimelineClock` using a fixed dt, with a catch-up cap per frame.
+enabled = true
+deterministic = true
+fixed_dt_secs = 0.016666667
+max_catchup_steps = 4
+
+# Optional: restrict which timeline event tracks run.
+# enabled_tracks = ["main", "camera"]
+
+[runtime.hot_reload]
+# Debounce changes before attempting reload.
+debounce_ms = 250
+
+# If true, reload errors are logged and the app keeps running. If false, the app exits.
+warn_and_continue = true
+
+[runtime.playback]
+# When a scene has a baked simulation attached, prefer baked playback over running simulation.
+prefer_baked_over_simulation = true
+
+# Baked playback currently uses the timeline clock to drive interpolation time.
+baked_requires_timeline_clock = true
+
+[assets.hot_reload]
+# When runtime hot reload is enabled, also reload assets through Bevy's AssetServer
+# when watched asset files change (images, fonts, wgsl).
+enabled = true
+debounce_ms = 250
+warn_and_continue = true
+
+[simulation]
+# Simulation stepping scaffold (separate from timeline).
+backend = "native"
+enabled = true
+deterministic = true
+fixed_dt_secs = 0.016666667
+max_catchup_steps = 4
+seed = 0
+playing = true
+
+[export.bake]
+# Root for baked artifacts. Each bake creates a unique run directory under:
+# `.cache/simurom/scene/<scene>/bakes/<scene_xxhash>/run-<timestamp>-<pid>/`
+output_root = ".cache/simurom/scene"
+
+# Defaults used when CLI does not specify.
+default_fps = 60.0
+default_duration_secs = 10.0
+
+# Copy external assets referenced by the scene into the bake directory.
+copy_assets = true
+
+# Bake bucket hashing algorithm. This is currently fixed to xxhash64 in code.
+hash_algorithm = "xxhash64"
+time_scale = 1.0
+
+[export.frames]
+# Root for export outputs. Each export creates a unique run directory under:
+# `.cache/simurom/scene/<scene>/exports/<scene_xxhash>/run-<timestamp>-<pid>/`
+output_root = ".cache/simurom/scene"
+
+# Default export timing (CLI overrides take precedence).
+default_fps = 60.0
+default_duration_secs = 10.0
+
+# Render resolution for exported frames.
+width = 1920
+height = 1080
+
+# If true, show a window while exporting frames (debugging).
+window_visible = false
+
+# If true, overwrite an existing export directory.
+overwrite = false
+
+[export.video]
+# Path to ffmpeg executable (used for mp4 encoding).
+ffmpeg_path = "ffmpeg"
+
+# Video encoding defaults.
+codec = "libx264"
+preset = "medium"
+crf = 18
+pix_fmt = "yuv420p"
+
+# If true, overwrite the output mp4.
+overwrite = false
+
+# If true, keep exported PNG frames after encoding.
+keep_frames = false
+
+[ui.timeline]
+# Mousewheel time seeking when the cursor is over the timeline scrubber.
+wheel_seek_secs = 0.1
+wheel_seek_secs_min = 0.005
+wheel_seek_secs_max = 2.0
+
+# While holding Ctrl, wheel notches scale the seek step by this multiplier.
+wheel_seek_ctrl_scale = 1.2

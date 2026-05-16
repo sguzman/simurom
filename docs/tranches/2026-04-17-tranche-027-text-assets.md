@@ -19,8 +19,8 @@
 
 ## Verification Results
 
-- `cargo check -p flatfekt-schema` passes.
-- `cargo check -p flatfekt-runtime` passes.
-- `cargo check -p flatfekt-assets` passes.
+- `cargo check -p simurom-schema` passes.
+- `cargo check -p simurom-runtime` passes.
+- `cargo check -p simurom-assets` passes.
 - `update_typewriter` system integrated into simulation tick.
 - `spawn_text` handles `TextSpec` with `Option<value>` and joined spans.

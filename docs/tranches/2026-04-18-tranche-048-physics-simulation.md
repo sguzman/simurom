@@ -10,6 +10,6 @@ Implementing basic physics integration for falling and bouncing entities.
   - M0: Implement instantiation of physics components
 
 ## Changes
-- `flatfekt-runtime/src/simulation.rs`: Add `Collider`, `SimRegionRes`, and bounds collision logic.
-- `flatfekt-runtime/src/lib.rs`: Hook up physics instantiation.
+- `simurom-runtime/src/simulation.rs`: Add `Collider`, `SimRegionRes`, and bounds collision logic.
+- `simurom-runtime/src/lib.rs`: Hook up physics instantiation.
 - `scenes/physics_test.toml`: Add test scene.

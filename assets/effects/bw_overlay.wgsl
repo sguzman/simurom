@@ -1,6 +1,6 @@
-// Flatfekt postprocess effect: black/white transparent overlay.
+// Simurom postprocess effect: black/white transparent overlay.
 //
-// Uses the standard Flatfekt postprocess material bind group (group 2).
+// Uses the standard Simurom postprocess material bind group (group 2).
 
 struct Params {
   intensity: f32,

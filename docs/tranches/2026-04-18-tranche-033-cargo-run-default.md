@@ -1,1 +1,1 @@
-- [x] Tooling (M0): Remove workspace `cargo run` ambiguity (single `flatfekt` bin; set a workspace default run target)
+- [x] Tooling (M0): Remove workspace `cargo run` ambiguity (single `simurom` bin; set a workspace default run target)

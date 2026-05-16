@@ -31,8 +31,8 @@ Own interface around the scene: HUD, inspector panels, debug overlays, menus, ti
 ### M2 — timeline controls
 - [x] Add play/pause/step controls for timeline playback
 - [x] Add timeline scrubber and current time display
-  - [x] Provide scrubber UI in `flatfekt-viewer`
-  - [x] Provide scrubber UI in `flatfekt`
+  - [x] Provide scrubber UI in `simurom-viewer`
+  - [x] Provide scrubber UI in `simurom`
   - [x] Update scrubber to apply frames while paused
   - [x] Add seek-to-start / seek-to-end buttons
   - [x] Add mousewheel seek on scrubber hover (Ctrl+wheel adjusts seek step)
