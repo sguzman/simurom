@@ -653,7 +653,9 @@ pub fn build_app(
   }
 
   app
-    .insert_resource(ConfigRes(cfg.clone()))
+    .insert_resource(ConfigRes(
+      cfg.clone()
+    ))
     .insert_resource(ScenePathRes(
       scene_path
     ))
