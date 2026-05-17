@@ -78,7 +78,8 @@ pub enum RenderKind {
   Sprite,
   Text,
   Particles,
-  Grid
+  Grid,
+  Character
 }
 
 fn fxhash64(bytes: &[u8]) -> u64 {
@@ -285,6 +286,7 @@ pub struct AssetsCacheRes(
 pub mod agents;
 pub mod aggregate;
 pub mod animation;
+pub mod character_systems;
 
 pub mod headless_timeline;
 pub mod interaction;
@@ -503,7 +505,8 @@ impl Plugin for SimuromRuntimePlugin {
       .add_systems(
         Update,
         hot_reload_system.in_set(SimuromSet::Load)
-      );
+      )
+      .add_plugins(character_systems::CharacterSystemsPlugin);
   }
 }
 pub fn build_app(
@@ -1026,7 +1029,8 @@ fn instantiate_scene(
         physics,
         collider,
         particles: None,
-        grid: None
+        grid: None,
+        character_file: None
       });
     }
     if let Some(sprite) = &ent.sprite {
@@ -1040,7 +1044,8 @@ fn instantiate_scene(
         physics,
         collider,
         particles: None,
-        grid: None
+        grid: None,
+        character_file: None
       });
     }
     if let Some(text) = &ent.text {
@@ -1054,7 +1059,8 @@ fn instantiate_scene(
         physics,
         collider,
         particles: None,
-        grid: None
+        grid: None,
+        character_file: None
       });
     }
     if let Some(particles) =
@@ -1070,7 +1076,8 @@ fn instantiate_scene(
         physics,
         collider,
         particles: Some(particles),
-        grid: None
+        grid: None,
+        character_file: None
       });
     }
     if let Some(grid) = &ent.grid {
@@ -1084,7 +1091,27 @@ fn instantiate_scene(
         physics,
         collider,
         particles: None,
-        grid: Some(grid)
+        grid: Some(grid),
+        character_file: None
+      });
+    }
+    if let Some(character_file) =
+      &ent.character_file
+    {
+      plan.push(SpawnOp {
+        id: &ent.id,
+        kind: RenderKind::Character,
+        tf,
+        shape: None,
+        sprite: None,
+        text: None,
+        physics,
+        collider,
+        particles: None,
+        grid: None,
+        character_file: Some(
+          character_file
+        )
       });
     }
   }
@@ -1155,6 +1182,20 @@ fn instantiate_scene(
           op.grid.unwrap(),
           op.tf
         ))
+      }
+      | RenderKind::Character => {
+        spawn_character(
+          &mut commands,
+          &assets,
+          &cfg.0,
+          &assets_root.0,
+          &mut asset_cache.0,
+          op.id,
+          op.character_file.unwrap(),
+          op.tf,
+          op.physics,
+          op.collider
+        )
       }
     };
 
@@ -1322,7 +1363,8 @@ struct SpawnOp<'a> {
   >,
   grid: Option<
     &'a simurom_schema::GridSpec
-  >
+  >,
+  character_file: Option<&'a String>
 }
 
 pub(crate) fn transform_from_spec(
@@ -1429,6 +1471,196 @@ fn spawn_sprite(
       None
     }
   }
+}
+
+fn spawn_character(
+  commands: &mut Commands,
+  assets: &AssetServer,
+  cfg: &simurom_config::RootConfig,
+  assets_root: &PathBuf,
+  asset_cache: &mut AssetCache,
+  entity_id: &str,
+  character_file_path: &str,
+  tf: Transform,
+  physics: Option<
+    &simurom_schema::PhysicsSpec
+  >,
+  collider: Option<
+    &simurom_schema::ColliderSpec
+  >
+) -> Option<Entity> {
+  let path = assets_root
+    .join(character_file_path);
+  let toml_str =
+    match std::fs::read_to_string(&path)
+    {
+      | Ok(s) => s,
+      | Err(err) => {
+        tracing::error!(
+          path = ?path,
+          error = %err,
+          "failed to read character TOML file"
+        );
+        return None;
+      }
+    };
+
+  let spec: simurom_schema::character::CharacterSpec = match toml::from_str(&toml_str) {
+    Ok(s) => s,
+    Err(err) => {
+      tracing::error!(
+        path = ?path,
+        error = %err,
+        "failed to parse character TOML file"
+      );
+      return None;
+    }
+  };
+
+  let mut parent_entity = commands
+    .spawn((
+      Name::new(entity_id.to_string()),
+      tf,
+      Visibility::default(),
+      InheritedVisibility::default(),
+      ViewVisibility::default()
+    ));
+
+  insert_physics(
+    &mut parent_entity,
+    cfg,
+    physics,
+    collider
+  );
+
+  let root_id = parent_entity.id();
+
+  parent_entity.with_children(|parent| {
+    for segment in &spec.character.segments {
+      let relative_ref = AssetRef::String(segment.sprite.clone());
+      let handle = bevy_load::load_image_cached(
+        asset_cache,
+        assets,
+        cfg,
+        assets_root,
+        &relative_ref
+      );
+
+      match handle {
+        Ok(image_handle) => {
+          let mut child = parent.spawn((
+            Sprite {
+              image: image_handle.clone(),
+              ..default()
+            },
+            Transform::from_xyz(
+              segment.offset.x,
+              segment.offset.y,
+              segment.layer_offset
+            ),
+            SimuromSprite {
+              image: relative_ref,
+            },
+            character_systems::CharacterSegmentMarker,
+          ));
+
+          if let Some(sway) = &segment.wind_sway {
+            child.insert(character_systems::WindSwaySegment {
+              amplitude: sway.amplitude,
+              frequency: sway.frequency,
+              phase_offset: sway.phase_offset,
+            });
+          }
+
+          if let Some(blink) = &segment.blink {
+            let closed_ref = AssetRef::String(blink.closed_sprite.clone());
+            let closed_handle = bevy_load::load_image_cached(
+              asset_cache,
+              assets,
+              cfg,
+              assets_root,
+              &closed_ref
+            );
+            if let Ok(closed_image_handle) = closed_handle {
+              child.insert(character_systems::BlinkingSegment {
+                timer: blink.blink_interval,
+                blink_interval: blink.blink_interval,
+                blink_duration: blink.blink_duration,
+                open_handle: image_handle,
+                closed_handle: closed_image_handle,
+                is_closed: false,
+              });
+            } else {
+              tracing::error!("failed to load closed eye sprite: {}", blink.closed_sprite);
+            }
+          }
+        }
+        Err(err) => {
+          tracing::error!(
+            sprite = %segment.sprite,
+            error = %err,
+            "failed to load character segment sprite"
+          );
+        }
+      }
+    }
+
+    for slot in &spec.character.clothing_slots {
+      let child_tf = Transform::from_xyz(
+        slot.offset.x,
+        slot.offset.y,
+        slot.layer_offset
+      );
+
+      if let Some(default_sprite) = &slot.default_sprite {
+        let relative_ref = AssetRef::String(default_sprite.clone());
+        let handle = bevy_load::load_image_cached(
+          asset_cache,
+          assets,
+          cfg,
+          assets_root,
+          &relative_ref
+        );
+        match handle {
+          Ok(image_handle) => {
+            parent.spawn((
+              Sprite {
+                image: image_handle,
+                ..default()
+              },
+              child_tf,
+              SimuromSprite {
+                image: relative_ref,
+              },
+              character_systems::ClothingSlotSegment {
+                slot_name: slot.name.clone(),
+              },
+            ));
+          }
+          Err(err) => {
+            tracing::error!(
+              sprite = %default_sprite,
+              error = %err,
+              "failed to load default clothing sprite"
+            );
+          }
+        }
+      } else {
+        parent.spawn((
+          Sprite::default(),
+          child_tf,
+          SimuromSprite {
+            image: AssetRef::String(String::new()),
+          },
+          character_systems::ClothingSlotSegment {
+            slot_name: slot.name.clone(),
+          },
+        ));
+      }
+    }
+  });
+
+  Some(root_id)
 }
 
 fn spawn_text(

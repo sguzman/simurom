@@ -82,7 +82,8 @@ pub fn input_action_observer(
   existing_popups: Query<
     Entity,
     With<PopupText>
-  >
+  >,
+  entity_map: Res<crate::EntityMap>
 ) {
   let action_name = &action.name;
   if action_name
@@ -165,6 +166,48 @@ pub fn input_action_observer(
         timer: 3.5
       }
     ));
+  } else if action_name
+    .starts_with("swap_clothing:")
+  {
+    let suffix = action_name
+      .strip_prefix("swap_clothing:")
+      .unwrap();
+    let parts: Vec<&str> =
+      suffix.split(':').collect();
+    if parts.len() == 3 {
+      let target_id = parts[0];
+      let slot_name =
+        parts[1].to_string();
+      let new_sprite_path =
+        parts[2].to_string();
+
+      if let Some(entities) =
+        entity_map.0.get(target_id)
+      {
+        for &entity in entities {
+          commands.trigger(crate::character_systems::SwapClothingEvent {
+            entity,
+            slot_name: slot_name.clone(),
+            new_sprite_path: new_sprite_path.clone(),
+          });
+        }
+      } else {
+        tracing::error!(
+          target_id,
+          "No entities found in \
+           entity_map for clothing \
+           swap"
+        );
+      }
+    } else {
+      tracing::error!(
+        suffix,
+        "Invalid swap_clothing suffix \
+         format; expected \
+         target_id:slot_name:\
+         sprite_path"
+      );
+    }
   }
 }
 

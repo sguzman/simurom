@@ -1,5 +1,7 @@
 #![forbid(unsafe_code)]
 
+pub mod character;
+
 use std::collections::HashSet;
 use std::path::{
   Path,
@@ -354,24 +356,25 @@ pub struct BackgroundSpec {
 )]
 #[serde(deny_unknown_fields)]
 pub struct EntitySpec {
-  pub id:          String,
-  pub extends:     Option<String>,
+  pub id:             String,
+  pub extends:        Option<String>,
   pub activation:
     Option<ActivationSpec>,
-  pub tags:        Option<Vec<String>>,
-  pub transform:   Option<Transform2d>,
-  pub sprite:      Option<SpriteSpec>,
-  pub text:        Option<TextSpec>,
-  pub shape:       Option<ShapeSpec>,
-  pub physics:     Option<PhysicsSpec>,
-  pub collider:    Option<ColliderSpec>,
+  pub tags: Option<Vec<String>>,
+  pub transform: Option<Transform2d>,
+  pub sprite: Option<SpriteSpec>,
+  pub text:           Option<TextSpec>,
+  pub shape:          Option<ShapeSpec>,
+  pub physics: Option<PhysicsSpec>,
+  pub collider: Option<ColliderSpec>,
   pub particles:
     Option<ParticleSystemSpec>,
   pub interaction:
     Option<EntityInteractionSpec>,
-  pub agent:       Option<AgentSpec>,
+  pub agent:          Option<AgentSpec>,
   pub script: Option<ScriptHookSpec>,
-  pub grid:        Option<GridSpec>
+  pub grid:           Option<GridSpec>,
+  pub character_file: Option<String>
 }
 
 #[derive(

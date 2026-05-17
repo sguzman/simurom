@@ -1,0 +1,37 @@
+[character]
+name = "Stellar Techgirl"
+scale = 1.0
+
+[[character.segments]]
+id = "body"
+layer_offset = 0.0
+sprite = "mini_game/images/char_base.png"
+offset = { x = 0.0, y = 0.0 }
+
+[[character.segments]]
+id = "hair"
+layer_offset = 1.0
+sprite = "mini_game/images/char_hair.png"
+offset = { x = 0.0, y = 0.0 }
+
+[character.segments.wind_sway]
+amplitude = 0.05
+frequency = 2.0
+phase_offset = 0.0
+
+[[character.segments]]
+id = "eyes"
+layer_offset = 2.0
+sprite = "mini_game/images/char_eyes_open.png"
+offset = { x = 0.0, y = 0.0 }
+
+[character.segments.blink]
+blink_interval = 4.0
+blink_duration = 0.15
+closed_sprite = "mini_game/images/char_eyes_closed.png"
+
+[[character.clothing_slots]]
+name = "dress"
+default_sprite = "mini_game/images/char_dress_blue.png"
+layer_offset = 0.5
+offset = { x = 0.0, y = 0.0 }

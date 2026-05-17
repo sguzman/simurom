@@ -1,0 +1,134 @@
+[scene]
+schema_version = "0.1"
+
+[scene.resolution]
+width = 1280
+height = 720
+
+[scene.camera]
+x = 0.0
+y = 0.0
+zoom = 1.0
+clear_color = { r = 0.05, g = 0.05, b = 0.08 }
+
+[scene.interaction]
+[[scene.interaction.actions]]
+action = "move_up"
+keys = ["e"]
+
+[[scene.interaction.actions]]
+action = "move_down"
+keys = ["d"]
+
+[[scene.interaction.actions]]
+action = "move_left"
+keys = ["s"]
+
+[[scene.interaction.actions]]
+action = "move_right"
+keys = ["f"]
+
+[[scene.interaction.actions]]
+action = "interact"
+keys = ["space"]
+
+[[scene.entities]]
+id = "room_floor"
+[scene.entities.transform]
+x = 0.0
+y = 0.0
+z = 0.1
+[scene.entities.sprite]
+image = "mini_game/images/floor.png"
+width = 1000.0
+height = 600.0
+
+# Stellar Techgirl Character
+[[scene.entities]]
+id = "stellar_character"
+character_file = "mini_game/characters/main_character.toml"
+[scene.entities.transform]
+x = 0.0
+y = 80.0
+z = 2.0
+
+# Closet 1: Blue Techwear Outfit
+[[scene.entities]]
+id = "closet_blue"
+[scene.entities.transform]
+x = -200.0
+y = 0.0
+z = 1.0
+[scene.entities.shape]
+kind = "circle"
+radius = 30.0
+color = { r = 0.1, g = 0.4, b = 0.8 }
+[scene.entities.interaction]
+on_click = "swap_clothing:stellar_character:dress:mini_game/images/char_dress_blue.png"
+
+[[scene.entities]]
+id = "closet_blue_label"
+[scene.entities.transform]
+x = -200.0
+y = -50.0
+z = 1.5
+[scene.entities.text]
+value = "Equip Blue Dress (Space)"
+size = 14.0
+color = { r = 0.4, g = 0.7, b = 1.0 }
+anchor = "center"
+align = "center"
+
+# Closet 2: Red Techwear Outfit
+[[scene.entities]]
+id = "closet_red"
+[scene.entities.transform]
+x = 200.0
+y = 0.0
+z = 1.0
+[scene.entities.shape]
+kind = "circle"
+radius = 30.0
+color = { r = 0.8, g = 0.2, b = 0.3 }
+[scene.entities.interaction]
+on_click = "swap_clothing:stellar_character:dress:mini_game/images/char_dress_red.png"
+
+[[scene.entities]]
+id = "closet_red_label"
+[scene.entities.transform]
+x = 200.0
+y = -50.0
+z = 1.5
+[scene.entities.text]
+value = "Equip Red Dress (Space)"
+size = 14.0
+color = { r = 1.0, g = 0.5, b = 0.6 }
+anchor = "center"
+align = "center"
+
+# Player Character
+[[scene.entities]]
+id = "player_character"
+[scene.entities.transform]
+x = 0.0
+y = -150.0
+z = 3.0
+[scene.entities.sprite]
+image = "mini_game/images/player.png"
+width = 80.0
+height = 80.0
+[scene.entities.agent]
+kind = "player"
+
+[[scene.entities]]
+id = "instructions_banner"
+[scene.entities.transform]
+x = 0.0
+y = -260.0
+z = 1.5
+[scene.entities.text]
+value = "DYNAMIC SEGMENTED CHARACTER DEMO\nApproach the colored closets and press SPACE to swap outfit slots dynamically.\nWind sway and eye blinking are simulated procedurally!"
+size = 18.0
+color = { r = 0.8, g = 0.8, b = 0.9 }
+anchor = "center"
+align = "center"
