@@ -1863,7 +1863,7 @@ pub fn lookup_entities<'a>(
 fn reset_scene_system(
   mut commands: Commands,
   spawned: Res<SpawnedEntities>,
-  cameras: Query<Entity, With<Camera>>,
+  cameras: Query<(Entity, &Camera)>,
   popups: Query<
     Entity,
     With<interaction::PopupText>
@@ -1876,11 +1876,15 @@ fn reset_scene_system(
       entity.despawn();
     }
   }
-  for camera in cameras.iter() {
-    if let Ok(mut entity) =
-      commands.get_entity(camera)
-    {
-      entity.despawn();
+  for (camera, cam_cfg) in
+    cameras.iter()
+  {
+    if cam_cfg.order == 0 {
+      if let Ok(mut entity) =
+        commands.get_entity(camera)
+      {
+        entity.despawn();
+      }
     }
   }
   for popup in popups.iter() {
