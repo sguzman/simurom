@@ -37,6 +37,7 @@ Own interface around the scene: HUD, inspector panels, debug overlays, menus, ti
   - [x] Add seek-to-start / seek-to-end buttons
   - [x] Add mousewheel seek on scrubber hover (Ctrl+wheel adjusts seek step)
 - [x] Add aggregate playlist panel (jump buttons) and dual timelines (global + per-scene) when stitching is enabled
+- [x] Add runtime keyboard toggle (e.g. Tab/Backquote) to hide/show the Egui Timeline and debug UI panel overlay
 
 ### M2b — scene playback (video-like)
 - [x] Add rewind/fast-forward controls (when enabled by scene policy)

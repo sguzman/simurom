@@ -162,6 +162,10 @@ fn egui_control_panel(
     Option<f32>
   >
 ) {
+  if !debug_settings.ui_visible {
+    return;
+  }
+
   let Ok(ctx) = egui.ctx_mut() else {
     return;
   };

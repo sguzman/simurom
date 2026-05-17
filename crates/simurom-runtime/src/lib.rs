@@ -108,12 +108,39 @@ pub enum RuntimeError {
 #[derive(Resource, Clone)]
 pub struct ConfigRes(pub RootConfig);
 
-#[derive(
-  Resource, Default, Debug, Clone,
-)]
+#[derive(Resource, Debug, Clone)]
 pub struct DebugSettings {
   pub wireframe:   bool,
-  pub draw_bounds: bool
+  pub draw_bounds: bool,
+  pub ui_visible:  bool
+}
+
+impl Default for DebugSettings {
+  fn default() -> Self {
+    Self {
+      wireframe:   false,
+      draw_bounds: false,
+      ui_visible:  true
+    }
+  }
+}
+
+pub fn toggle_ui_visibility_system(
+  keyboard: Res<ButtonInput<KeyCode>>,
+  mut debug: ResMut<DebugSettings>
+) {
+  if keyboard.just_pressed(KeyCode::Tab)
+    || keyboard
+      .just_pressed(KeyCode::Backquote)
+  {
+    debug.ui_visible =
+      !debug.ui_visible;
+    let visible = debug.ui_visible;
+    tracing::info!(
+      visible = visible,
+      "UI visibility toggled"
+    );
+  }
 }
 
 #[derive(Resource, Clone)]
@@ -386,6 +413,7 @@ impl Plugin for SimuromRuntimePlugin {
           agents::agent_tick_system,
           agents::player_movement_system,
           agents::scripting_system,
+          toggle_ui_visibility_system,
         )
       )
       .add_systems(

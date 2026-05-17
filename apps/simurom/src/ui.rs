@@ -22,8 +22,12 @@ pub fn maybe_add_ui_plugins(
 ) -> anyhow::Result<()> {
   if cfg.feature_ui_egui_enabled() {
     tracing::info!(
-      "enabling egui control UI"
+      "enabling egui control UI \
+       (hidden by default)"
     );
+    if let Some(mut debug) = app.world_mut().get_resource_mut::<DebugSettings>() {
+      debug.ui_visible = false;
+    }
     app.add_plugins(EguiPlugin::default())
       .add_systems(
         Update,
@@ -94,6 +98,10 @@ fn egui_timeline_panel(
     Option<f32>
   >
 ) {
+  if !debug.ui_visible {
+    return;
+  }
+
   let Ok(ctx) = egui.ctx_mut() else {
     return;
   };
