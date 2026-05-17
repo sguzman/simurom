@@ -390,7 +390,11 @@ fn apply_camera_targets(
   >,
   mut images: ResMut<Assets<Image>>,
   windows: Query<&Window>,
-  cameras: Query<(Entity, &Camera)>,
+  cameras: Query<(
+    Entity,
+    &Camera,
+    Option<&RenderTarget>
+  )>,
   mut commands: Commands
 ) {
   let Some(effects) = effects else {
@@ -503,8 +507,11 @@ fn apply_camera_targets(
 
   // Ensure the main camera (order 0)
   // renders into the offscreen image.
-  for (e, cam) in cameras.iter() {
-    if cam.order == 0 {
+  for (e, cam, target) in cameras.iter()
+  {
+    if cam.order == 0
+      && target.is_none()
+    {
       if let Ok(mut entity_cmds) =
         commands.get_entity(e)
       {

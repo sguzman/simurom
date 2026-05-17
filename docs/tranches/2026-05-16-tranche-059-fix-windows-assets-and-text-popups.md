@@ -8,3 +8,7 @@ Source roadmaps: `docs/roadmaps/assets-roadmap.md`, `docs/roadmaps/interaction-r
 - [x] Interaction (M1): Clear previous popup text HUD messages before
   spawning new ones to prevent text stacking/overlapping when
   interacting with objects.
+- [x] Scene Transitions (M2): Avoid race-condition ECS panics during transitions
+  by using `commands.get_entity()` checks and querying `cameras` without
+  an existing `RenderTarget` in `apply_camera_targets` to avoid duplicate
+  insertions on despawned entities.
