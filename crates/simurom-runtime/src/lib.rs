@@ -143,6 +143,44 @@ pub fn toggle_ui_visibility_system(
   }
 }
 
+#[derive(Resource)]
+pub struct FramepaceTimer {
+  pub last_frame: std::time::Instant
+}
+
+impl Default for FramepaceTimer {
+  fn default() -> Self {
+    Self {
+      last_frame:
+        std::time::Instant::now()
+    }
+  }
+}
+
+pub fn fps_limiter_system(
+  mut timer: ResMut<FramepaceTimer>,
+  cfg: Res<ConfigRes>
+) {
+  let target_fps =
+    cfg.0.render_target_fps();
+  if target_fps == 0 {
+    return;
+  }
+  let target_duration =
+    std::time::Duration::from_secs_f64(
+      1.0 / target_fps as f64
+    );
+  let elapsed =
+    timer.last_frame.elapsed();
+  if elapsed < target_duration {
+    let sleep_dur =
+      target_duration - elapsed;
+    std::thread::sleep(sleep_dur);
+  }
+  timer.last_frame =
+    std::time::Instant::now();
+}
+
 #[derive(Resource, Clone)]
 pub struct SceneRes(pub SceneFile);
 
@@ -399,6 +437,11 @@ impl Plugin for SimuromRuntimePlugin {
       .add_observer(simulation::sim_control_system)
       .insert_resource(interaction::ActionMap::default())
       .init_resource::<DebugSettings>()
+      .init_resource::<FramepaceTimer>()
+      .add_systems(
+        Last,
+        fps_limiter_system,
+      )
       .add_systems(
         Update,
         (
@@ -411,7 +454,7 @@ impl Plugin for SimuromRuntimePlugin {
           interaction::picking_system,
           interaction::popup_text_system,
           agents::agent_tick_system,
-          agents::player_movement_system,
+          agents::player_movement_system.after(interaction::input_system),
           agents::scripting_system,
           toggle_ui_visibility_system,
         )
@@ -610,7 +653,7 @@ pub fn build_app(
   }
 
   app
-    .insert_resource(ConfigRes(cfg))
+    .insert_resource(ConfigRes(cfg.clone()))
     .insert_resource(ScenePathRes(
       scene_path
     ))
@@ -644,6 +687,18 @@ pub fn build_app(
     bevy::window::WindowResolution::new(
       win_w, win_h
     );
+  let pm_str = cfg
+    .render_present_mode()
+    .to_lowercase();
+  window.present_mode = match pm_str.as_str() {
+    "fifo" => bevy::window::PresentMode::Fifo,
+    "fiforelaxed" => bevy::window::PresentMode::FifoRelaxed,
+    "immediate" => bevy::window::PresentMode::Immediate,
+    "mailbox" => bevy::window::PresentMode::Mailbox,
+    "autovsync" => bevy::window::PresentMode::AutoVsync,
+    "autonovsync" => bevy::window::PresentMode::AutoNoVsync,
+    _ => bevy::window::PresentMode::AutoVsync,
+  };
   plugins = plugins.set(
     bevy::window::WindowPlugin {
       primary_window: Some(window),

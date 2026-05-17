@@ -176,8 +176,9 @@ pub struct PlatformConfig {
   Debug, Clone, Deserialize, Default,
 )]
 pub struct RenderConfig {
-  pub backend:    Option<String>,
-  pub target_fps: Option<u32>,
+  pub backend:      Option<String>,
+  pub target_fps:   Option<u32>,
+  pub present_mode: Option<String>,
   pub window:
     Option<RenderWindowConfig>,
   pub effects:
@@ -628,6 +629,26 @@ impl RootConfig {
     }
 
     if let Some(render) = &self.render {
+      if let Some(pm) =
+        &render.present_mode
+      {
+        let pm = pm.as_str();
+        let ok = matches!(
+          pm,
+          "fifo"
+            | "fiforelaxed"
+            | "immediate"
+            | "mailbox"
+            | "autovsync"
+            | "autonovsync"
+        );
+        if !ok {
+          return Err(ConfigError::Validate(format!(
+            "unsupported render.present_mode {:?}; expected one of fifo|fiforelaxed|immediate|mailbox|autovsync|autonovsync",
+            pm
+          )));
+        }
+      }
       if let Some(win) = &render.window
       {
         if let Some(w) = win.width {
@@ -949,6 +970,18 @@ impl RootConfig {
       .as_ref()
       .and_then(|r| r.target_fps)
       .unwrap_or(60)
+  }
+
+  pub fn render_present_mode(
+    &self
+  ) -> &str {
+    self
+      .render
+      .as_ref()
+      .and_then(|r| {
+        r.present_mode.as_deref()
+      })
+      .unwrap_or("autovsync")
   }
 
   pub fn render_window_width(

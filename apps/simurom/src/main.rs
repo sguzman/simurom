@@ -59,7 +59,15 @@ enum Command {
   Validate { scene: PathBuf },
   /// Run a scene (overrides any
   /// configured `app.scene_path`).
-  Run { scene: PathBuf },
+  Run {
+    scene: PathBuf,
+    /// Force enable the
+    /// bevy-inspector-egui panel and
+    /// the Egui timeline control
+    /// overlay
+    #[arg(long, short)]
+    debug: bool
+  },
 
   /// Run a scene's timeline headlessly
   /// (no window) and log dispatched
@@ -108,7 +116,8 @@ fn main() -> anyhow::Result<()> {
       Ok(())
     }
     | Command::Run {
-      scene
+      scene,
+      debug
     } => {
       #[cfg(unix)]
       configure_unix_backend_env(
@@ -136,6 +145,7 @@ fn main() -> anyhow::Result<()> {
       ui::maybe_add_ui_plugins(
         &cfg,
         scene_allows_inspector,
+        debug,
         &mut app
       )?;
       app.run();

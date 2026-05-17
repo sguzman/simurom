@@ -18,15 +18,20 @@ use simurom_runtime::{
 pub fn maybe_add_ui_plugins(
   cfg: &RootConfig,
   scene_allows_inspector: bool,
+  debug_mode: bool,
   app: &mut App
 ) -> anyhow::Result<()> {
-  if cfg.feature_ui_egui_enabled() {
+  let enable_egui = cfg
+    .feature_ui_egui_enabled()
+    || debug_mode;
+  if enable_egui {
     tracing::info!(
       "enabling egui control UI \
-       (hidden by default)"
+       (debug_mode = {})",
+      debug_mode
     );
     if let Some(mut debug) = app.world_mut().get_resource_mut::<DebugSettings>() {
-      debug.ui_visible = false;
+      debug.ui_visible = debug_mode;
     }
     app.add_plugins(EguiPlugin::default())
       .add_systems(
@@ -40,10 +45,11 @@ pub fn maybe_add_ui_plugins(
       );
   }
 
-  if cfg
+  let enable_inspector = (cfg
     .feature_inspector_egui_enabled()
-    && scene_allows_inspector
-  {
+    && scene_allows_inspector)
+    || debug_mode;
+  if enable_inspector {
     tracing::info!(
       "enabling bevy-inspector-egui"
     );

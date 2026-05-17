@@ -27,6 +27,7 @@ unix_backend = "wayland"
 # This project requires Vulkan and fails fast if no Vulkan adapter is available.
 backend = "vulkan"
 target_fps = 60
+present_mode = "autovsync"
 
 [render.window]
 # Default window resolution. A scene can override this by specifying:
