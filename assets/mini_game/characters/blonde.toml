@@ -1,0 +1,35 @@
+[character]
+name = "Blonde Heroine"
+scale = 1.0
+
+[[character.segments]]
+id = "body"
+layer_offset = 0.0
+sprite = "mini_game/images/blonde_base.png"
+offset = { x = 0.0, y = 0.0 }
+
+[[character.segments]]
+id = "eyes"
+layer_offset = 1.0
+sprite = "mini_game/images/blonde_eyes_open.png"
+offset = { x = 0.0, y = 0.0 }
+
+[character.segments.blink]
+base_interval = 5.0
+interval_delta = 2.0
+min_interval = 3.0
+max_interval = 7.0
+cooldown_seconds = 0.1
+frame_duration = 0.05
+blink_frames = [
+  "mini_game/images/blonde_eyes_open.png",
+  "mini_game/images/blonde_eyes_partial1.png",
+  "mini_game/images/blonde_eyes_partial2.png",
+  "mini_game/images/blonde_eyes_partial3.png",
+  "mini_game/images/blonde_eyes_closed.png"
+]
+
+[[character.clothing_slots]]
+name = "costume"
+layer_offset = 0.5
+offset = { x = 0.0, y = 0.0 }

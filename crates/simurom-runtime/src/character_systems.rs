@@ -21,6 +21,16 @@ pub struct WindSwaySegment {
   pub phase_offset: f32
 }
 
+#[derive(
+  Debug, Clone, Copy, PartialEq, Eq,
+)]
+pub enum AdvancedBlinkState {
+  Open,
+  Closing,
+  Closed,
+  Opening
+}
+
 #[derive(Component, Debug, Clone)]
 pub struct BlinkingSegment {
   pub timer:          f32,
@@ -28,7 +38,21 @@ pub struct BlinkingSegment {
   pub blink_duration: f32,
   pub open_handle:    Handle<Image>,
   pub closed_handle:  Handle<Image>,
-  pub is_closed:      bool
+  pub is_closed:      bool,
+
+  // Advanced multi-frame fields
+  pub is_advanced:      bool,
+  pub base_interval:    f32,
+  pub interval_delta:   f32,
+  pub min_interval:     f32,
+  pub max_interval:     f32,
+  pub cooldown_seconds: f32,
+  pub frame_duration:   f32,
+  pub blink_frames: Vec<Handle<Image>>,
+  pub state: AdvancedBlinkState,
+  pub frame_index:      usize,
+  pub frame_timer:      f32,
+  pub lcg_seed:         u32
 }
 
 #[derive(Component, Debug, Clone)]
@@ -99,22 +123,90 @@ pub fn blinking_system(
   for (mut sprite, mut blink) in
     query.iter_mut()
   {
-    blink.timer -= dt;
-    if blink.timer <= 0.0 {
-      if blink.is_closed {
-        // Open the eyes
-        blink.is_closed = false;
-        sprite.image =
-          blink.open_handle.clone();
-        blink.timer =
-          blink.blink_interval;
-      } else {
-        // Close the eyes
-        blink.is_closed = true;
-        sprite.image =
-          blink.closed_handle.clone();
-        blink.timer =
-          blink.blink_duration;
+    if blink.is_advanced {
+      match blink.state {
+        AdvancedBlinkState::Open => {
+          blink.timer -= dt;
+          if blink.timer <= 0.0 {
+            // Transition to closing state, reset frame index to 0
+            blink.state = AdvancedBlinkState::Closing;
+            blink.frame_index = 0;
+            blink.frame_timer = blink.frame_duration;
+            // Apply frame 0 just in case
+            if !blink.blink_frames.is_empty() {
+              sprite.image = blink.blink_frames[0].clone();
+            }
+          }
+        }
+        AdvancedBlinkState::Closing => {
+          blink.frame_timer -= dt;
+          if blink.frame_timer <= 0.0 {
+            blink.frame_timer = blink.frame_duration;
+            if blink.frame_index + 1 < blink.blink_frames.len() {
+              blink.frame_index += 1;
+              sprite.image = blink.blink_frames[blink.frame_index].clone();
+            } else {
+              // Reached fully closed
+              blink.state = AdvancedBlinkState::Closed;
+              blink.timer = blink.cooldown_seconds;
+            }
+          }
+        }
+        AdvancedBlinkState::Closed => {
+          blink.timer -= dt;
+          if blink.timer <= 0.0 {
+            // Transition to opening
+            blink.state = AdvancedBlinkState::Opening;
+            blink.frame_timer = blink.frame_duration;
+          }
+        }
+        AdvancedBlinkState::Opening => {
+          blink.frame_timer -= dt;
+          if blink.frame_timer <= 0.0 {
+            blink.frame_timer = blink.frame_duration;
+            if blink.frame_index > 0 {
+              blink.frame_index -= 1;
+              sprite.image = blink.blink_frames[blink.frame_index].clone();
+            } else {
+              // Back to open (idle)
+              blink.state = AdvancedBlinkState::Open;
+              // Generate a deterministic random interval between min_interval and max_interval using LCG
+              // seed = seed * 1103515245 + 12345
+              blink.lcg_seed = blink.lcg_seed.wrapping_mul(1103515245).wrapping_add(12345);
+              let pct = (blink.lcg_seed as f32) / (u32::MAX as f32);
+
+              // Map to range [base_interval - interval_delta, base_interval + interval_delta]
+              // while strictly clamping between [min_interval, max_interval]
+              let mut next_interval = blink.base_interval - blink.interval_delta + pct * 2.0 * blink.interval_delta;
+              if next_interval < blink.min_interval {
+                next_interval = blink.min_interval;
+              }
+              if next_interval > blink.max_interval {
+                next_interval = blink.max_interval;
+              }
+              blink.timer = next_interval;
+            }
+          }
+        }
+      }
+    } else {
+      blink.timer -= dt;
+      if blink.timer <= 0.0 {
+        if blink.is_closed {
+          // Open the eyes
+          blink.is_closed = false;
+          sprite.image =
+            blink.open_handle.clone();
+          blink.timer =
+            blink.blink_interval;
+        } else {
+          // Close the eyes
+          blink.is_closed = true;
+          sprite.image =
+            blink.closed_handle.clone();
+          blink.timer =
+            blink.blink_duration;
+        }
       }
     }
   }

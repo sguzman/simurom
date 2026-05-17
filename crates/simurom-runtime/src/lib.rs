@@ -1573,25 +1573,94 @@ fn spawn_character(
           }
 
           if let Some(blink) = &segment.blink {
-            let closed_ref = AssetRef::String(blink.closed_sprite.clone());
-            let closed_handle = bevy_load::load_image_cached(
-              asset_cache,
-              assets,
-              cfg,
-              assets_root,
-              &closed_ref
-            );
-            if let Ok(closed_image_handle) = closed_handle {
-              child.insert(character_systems::BlinkingSegment {
-                timer: blink.blink_interval,
-                blink_interval: blink.blink_interval,
-                blink_duration: blink.blink_duration,
-                open_handle: image_handle,
-                closed_handle: closed_image_handle,
-                is_closed: false,
-              });
-            } else {
-              tracing::error!("failed to load closed eye sprite: {}", blink.closed_sprite);
+            if let Some(frames) = &blink.blink_frames {
+              // Load all advanced frames
+              let mut loaded_frames = Vec::new();
+              let mut load_ok = true;
+              for frame_path in frames {
+                let frame_ref = AssetRef::String(frame_path.clone());
+                let frame_handle = bevy_load::load_image_cached(
+                  asset_cache,
+                  assets,
+                  cfg,
+                  assets_root,
+                  &frame_ref,
+                );
+                match frame_handle {
+                  Ok(handle) => loaded_frames.push(handle),
+                  Err(err) => {
+                    tracing::error!("failed to load advanced blink frame {}: {}", frame_path, err);
+                    load_ok = false;
+                  }
+                }
+              }
+
+              if load_ok && !loaded_frames.is_empty() {
+                let base_int = blink.base_interval.unwrap_or(5.0);
+                let int_delta = blink.interval_delta.unwrap_or(2.0);
+                let min_int = blink.min_interval.unwrap_or(3.0);
+                let max_int = blink.max_interval.unwrap_or(7.0);
+                let cooldown = blink.cooldown_seconds.unwrap_or(0.1);
+                let f_dur = blink.frame_duration.unwrap_or(0.05);
+
+                child.insert(character_systems::BlinkingSegment {
+                  timer: base_int,
+                  blink_interval: base_int,
+                  blink_duration: cooldown,
+                  open_handle: loaded_frames[0].clone(),
+                  closed_handle: loaded_frames.last().unwrap().clone(),
+                  is_closed: false,
+
+                  is_advanced: true,
+                  base_interval: base_int,
+                  interval_delta: int_delta,
+                  min_interval: min_int,
+                  max_interval: max_int,
+                  cooldown_seconds: cooldown,
+                  frame_duration: f_dur,
+                  blink_frames: loaded_frames,
+                  state: character_systems::AdvancedBlinkState::Open,
+                  frame_index: 0,
+                  frame_timer: 0.0,
+                  lcg_seed: 42,
+                });
+              }
+            } else if let Some(closed_sprite) = &blink.closed_sprite {
+              let closed_ref = AssetRef::String(closed_sprite.clone());
+              let closed_handle = bevy_load::load_image_cached(
+                asset_cache,
+                assets,
+                cfg,
+                assets_root,
+                &closed_ref
+              );
+              if let Ok(closed_image_handle) = closed_handle {
+                let interval = blink.blink_interval.unwrap_or(3.0);
+                let duration = blink.blink_duration.unwrap_or(0.15);
+                child.insert(character_systems::BlinkingSegment {
+                  timer: interval,
+                  blink_interval: interval,
+                  blink_duration: duration,
+                  open_handle: image_handle,
+                  closed_handle: closed_image_handle,
+                  is_closed: false,
+
+                  is_advanced: false,
+                  base_interval: 0.0,
+                  interval_delta: 0.0,
+                  min_interval: 0.0,
+                  max_interval: 0.0,
+                  cooldown_seconds: 0.0,
+                  frame_duration: 0.0,
+                  blink_frames: Vec::new(),
+                  state: character_systems::AdvancedBlinkState::Open,
+                  frame_index: 0,
+                  frame_timer: 0.0,
+                  lcg_seed: 0,
+                });
+              } else {
+                tracing::error!("failed to load closed eye sprite: {}", closed_sprite);
+              }
             }
           }
         }

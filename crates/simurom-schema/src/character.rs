@@ -41,9 +41,17 @@ pub struct WindSwaySpec {
 )]
 #[serde(deny_unknown_fields)]
 pub struct BlinkSpec {
-  pub blink_interval: f32,
-  pub blink_duration: f32,
-  pub closed_sprite:  String
+  pub blink_interval: Option<f32>,
+  pub blink_duration: Option<f32>,
+  pub closed_sprite:  Option<String>,
+
+  pub base_interval:    Option<f32>,
+  pub interval_delta:   Option<f32>,
+  pub min_interval:     Option<f32>,
+  pub max_interval:     Option<f32>,
+  pub cooldown_seconds: Option<f32>,
+  pub frame_duration:   Option<f32>,
+  pub blink_frames: Option<Vec<String>>
 }
 
 #[derive(
