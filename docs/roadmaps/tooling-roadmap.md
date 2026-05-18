@@ -32,3 +32,4 @@ Provide tools that make the engine usable: CLI, validators, linters, formatters,
 ### M3 — content generators
 - [x] Add “new scene” template generator (minimal working example)
 - [x] Add demo generator for text effects / timeline examples
+- [x] Add Rust CLI character preview generator for dynamic characters (GIF/PNG)
