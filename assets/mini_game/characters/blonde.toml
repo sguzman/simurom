@@ -12,7 +12,9 @@ offset = { x = 0.0, y = 0.0 }
 id = "eyes"
 layer_offset = 1.0
 sprite = "mini_game/images/blonde_eyes_open.png"
-offset = { x = 0.0, y = 0.0 }
+scale = 0.2225
+rotation = 10.25
+offset = { x = -19.6, y = 363.0 }
 
 [character.segments.blink]
 base_interval = 5.0

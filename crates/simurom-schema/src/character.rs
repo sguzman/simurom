@@ -67,6 +67,8 @@ pub struct SegmentSpec {
   pub layer_offset: f32,
   pub sprite:       String,
   pub offset:       Vector2d,
+  pub scale:        Option<f32>,
+  pub rotation:     Option<f32>,
   pub wind_sway: Option<WindSwaySpec>,
   pub blink:        Option<BlinkSpec>
 }

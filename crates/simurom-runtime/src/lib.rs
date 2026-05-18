@@ -1548,16 +1548,24 @@ fn spawn_character(
 
       match handle {
         Ok(image_handle) => {
+          let mut segment_transform = Transform::from_xyz(
+            segment.offset.x,
+            segment.offset.y,
+            segment.layer_offset
+          );
+          if let Some(s) = segment.scale {
+            segment_transform.scale = Vec3::splat(s);
+          }
+          if let Some(r) = segment.rotation {
+            segment_transform.rotation = Quat::from_rotation_z(r.to_radians());
+          }
+
           let mut child = parent.spawn((
             Sprite {
               image: image_handle.clone(),
               ..default()
             },
-            Transform::from_xyz(
-              segment.offset.x,
-              segment.offset.y,
-              segment.layer_offset
-            ),
+            segment_transform,
             SimuromSprite {
               image: relative_ref,
             },

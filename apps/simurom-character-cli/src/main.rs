@@ -122,42 +122,125 @@ fn open_image(
   Ok(rgba)
 }
 
+struct LayerInfo {
+  path: PathBuf,
+  offset_x: f32,
+  offset_y: f32,
+  scale: Option<f32>,
+  rotation: Option<f32>,
+}
+
+fn bilinear_sample(img: &RgbaImage, x: f32, y: f32) -> Option<image::Rgba<u8>> {
+  let w = img.width() as f32;
+  let h = img.height() as f32;
+  if x < 0.0 || x >= w - 1.0 || y < 0.0 || y >= h - 1.0 {
+    if x >= -0.5 && x < w - 0.5 && y >= -0.5 && y < h - 0.5 {
+      let px = x.round().clamp(0.0, w - 1.0) as u32;
+      let py = y.round().clamp(0.0, h - 1.0) as u32;
+      return Some(*img.get_pixel(px, py));
+    }
+    return None;
+  }
+
+  let x0 = x.floor() as u32;
+  let x1 = x0 + 1;
+  let y0 = y.floor() as u32;
+  let y1 = y0 + 1;
+
+  let dx = x - x.floor();
+  let dy = y - y.floor();
+
+  let p00 = img.get_pixel(x0, y0);
+  let p10 = img.get_pixel(x1, y0);
+  let p01 = img.get_pixel(x0, y1);
+  let p11 = img.get_pixel(x1, y1);
+
+  let mut channels = [0u8; 4];
+  for c in 0..4 {
+    let val0 = (p00[c] as f32) * (1.0 - dx) + (p10[c] as f32) * dx;
+    let val1 = (p01[c] as f32) * (1.0 - dx) + (p11[c] as f32) * dx;
+    let val = val0 * (1.0 - dy) + val1 * dy;
+    channels[c] = val.round().clamp(0.0, 255.0) as u8;
+  }
+
+  Some(image::Rgba(channels))
+}
+
 fn composite_layers(
   base_size: (u32, u32),
-  layers: &[(PathBuf, f32, f32)]
+  layers: &[LayerInfo]
 ) -> Result<RgbaImage> {
   let mut composite = RgbaImage::new(
     base_size.0,
     base_size.1
   );
 
-  for (path, ox, oy) in layers {
-    if !path.exists() {
+  for layer in layers {
+    if !layer.path.exists() {
       tracing::warn!(
         "Sprite file not found: {:?}",
-        path
+        layer.path
       );
       continue;
     }
 
-    let layer_img = open_image(path)?;
+    let layer_img = open_image(&layer.path)?;
+    let s = layer.scale.unwrap_or(1.0);
+    let r = layer.rotation.unwrap_or(0.0);
 
-    if *ox == 0.0 && *oy == 0.0 {
-      image::imageops::overlay(
-        &mut composite,
-        &layer_img,
-        0,
-        0
-      );
-    } else {
-      let x_offset = *ox as i64;
-      let y_offset = -(*oy as i64);
+    if s == 1.0 && r == 0.0 {
+      let x_offset = layer.offset_x as i64;
+      let y_offset = -(layer.offset_y as i64);
       image::imageops::overlay(
         &mut composite,
         &layer_img,
         x_offset,
         y_offset
       );
+    } else {
+      let target_cx = base_size.0 as f32 / 2.0;
+      let target_cy = base_size.1 as f32 / 2.0;
+      let src_cx = layer_img.width() as f32 / 2.0;
+      let src_cy = layer_img.height() as f32 / 2.0;
+
+      let angle_rad = -r.to_radians();
+      let cos_a = angle_rad.cos();
+      let sin_a = angle_rad.sin();
+
+      for ty in 0..base_size.1 {
+        for tx in 0..base_size.0 {
+          let x3 = (tx as f32 - target_cx) - layer.offset_x;
+          let y3 = (target_cy - ty as f32) - layer.offset_y;
+
+          let x2 = x3 * cos_a - y3 * sin_a;
+          let y2 = x3 * sin_a + y3 * cos_a;
+
+          let x1 = x2 / s;
+          let y1 = y2 / s;
+
+          let sx = x1 + src_cx;
+          let sy = src_cy - y1;
+
+          if let Some(sp) = bilinear_sample(&layer_img, sx, sy) {
+            let sa = sp[3] as f32 / 255.0;
+            if sa > 0.0 {
+              let dp = composite.get_pixel_mut(tx, ty);
+              let da = dp[3] as f32 / 255.0;
+
+              let out_a = sa + da * (1.0 - sa);
+              if out_a > 0.0 {
+                for c in 0..3 {
+                  let src_c = sp[c] as f32;
+                  let dest_c = dp[c] as f32;
+                  let blended = (src_c * sa + dest_c * da * (1.0 - sa)) / out_a;
+                  dp[c] = blended.round().clamp(0.0, 255.0) as u8;
+                }
+                dp[3] = (out_a * 255.0).round().clamp(0.0, 255.0) as u8;
+              }
+            }
+          }
+        }
+      }
     }
   }
 
@@ -272,11 +355,13 @@ fn main() -> Result<()> {
       let sprite_path = args
         .assets_dir
         .join(&seg.sprite);
-      layers.push((
-        sprite_path,
-        seg.offset.x,
-        seg.offset.y
-      ));
+      layers.push(LayerInfo {
+        path: sprite_path,
+        offset_x: seg.offset.x,
+        offset_y: seg.offset.y,
+        scale: seg.scale,
+        rotation: seg.rotation,
+      });
     }
 
     let mut static_img =
@@ -456,11 +541,13 @@ fn main() -> Result<()> {
               .assets_dir
               .join(&seg.sprite)
           };
-        layers.push((
-          sprite_path,
-          seg.offset.x,
-          seg.offset.y
-        ));
+        layers.push(LayerInfo {
+          path: sprite_path,
+          offset_x: seg.offset.x,
+          offset_y: seg.offset.y,
+          scale: seg.scale,
+          rotation: seg.rotation,
+        });
       }
 
       let mut frame_img =
@@ -504,6 +591,7 @@ fn main() -> Result<()> {
         })?;
     let mut encoder =
       GifEncoder::new(out_file);
+    encoder.set_repeat(image::codecs::gif::Repeat::Infinite)?;
     encoder
       .encode_frames(gif_frames)
       .with_context(|| {
