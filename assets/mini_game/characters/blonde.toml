@@ -43,8 +43,8 @@ blink_frames = [
 id = "hair"
 layer_offset = 2.0
 sprite = "mini_game/images/blonde_hair.png"
-scale = 1.25
-offset = { x = -5.0, y = 120.0 }
+scale = 0.57
+offset = { x = -11.5, y = 293.5 }
 
 [[character.clothing_slots]]
 name = "costume"
