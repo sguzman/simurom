@@ -45,6 +45,60 @@ struct Args {
   assets_dir: PathBuf
 }
 
+fn remove_white_background(img: &mut RgbaImage) {
+  let (width, height) = img.dimensions();
+  if width == 0 || height == 0 {
+    return;
+  }
+
+  let mut visited = vec![false; (width * height) as usize];
+  let mut queue = std::collections::VecDeque::new();
+
+  // Start BFS from the four corners of the image
+  let corners = [
+    (0, 0),
+    (width - 1, 0),
+    (0, height - 1),
+    (width - 1, height - 1),
+  ];
+
+  for &(x, y) in &corners {
+    let idx = (y * width + x) as usize;
+    if !visited[idx] {
+      let pixel = img.get_pixel(x, y);
+      if pixel[0] > 240 && pixel[1] > 240 && pixel[2] > 240 && pixel[3] > 0 {
+        visited[idx] = true;
+        queue.push_back((x, y));
+      }
+    }
+  }
+
+  while let Some((cx, cy)) = queue.pop_front() {
+    let pixel = img.get_pixel_mut(cx, cy);
+    pixel[3] = 0;
+
+    let neighbors = [
+      (cx.wrapping_sub(1), cy),
+      (cx + 1, cy),
+      (cx, cy.wrapping_sub(1)),
+      (cx, cy + 1),
+    ];
+
+    for &(nx, ny) in &neighbors {
+      if nx < width && ny < height {
+        let nidx = (ny * width + nx) as usize;
+        if !visited[nidx] {
+          let npixel = img.get_pixel(nx, ny);
+          if npixel[0] > 240 && npixel[1] > 240 && npixel[2] > 240 && npixel[3] > 0 {
+            visited[nidx] = true;
+            queue.push_back((nx, ny));
+          }
+        }
+      }
+    }
+  }
+}
+
 fn open_image(
   path: &std::path::Path
 ) -> Result<RgbaImage> {
@@ -63,7 +117,9 @@ fn open_image(
         path
       )
     })?;
-  Ok(img.to_rgba8())
+  let mut rgba = img.to_rgba8();
+  remove_white_background(&mut rgba);
+  Ok(rgba)
 }
 
 fn composite_layers(
@@ -270,7 +326,7 @@ fn main() -> Result<()> {
   {
     let mut blink_frames_paths =
       Vec::new();
-    let mut eyes_segment_idx = None;
+    let mut eyes_segment_idx: Option<usize> = None;
 
     for (idx, seg) in
       segments.iter().enumerate()
@@ -341,7 +397,7 @@ fn main() -> Result<()> {
     // partial2 -> partial1 -> open
     let active_sequence =
       blink_frames_paths.clone();
-    let mut reverse_sequence =
+    let mut reverse_sequence: Vec<String> =
       Vec::new();
     if active_sequence.len() > 2 {
       for frame in active_sequence
