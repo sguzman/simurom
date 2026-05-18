@@ -39,6 +39,13 @@ blink_frames = [
   "mini_game/images/blonde_eyes_closed.png"
 ]
 
+[[character.segments]]
+id = "hair"
+layer_offset = 2.0
+sprite = "mini_game/images/blonde_hair.png"
+scale = 1.25
+offset = { x = -5.0, y = 120.0 }
+
 [[character.clothing_slots]]
 name = "costume"
 layer_offset = 0.5
