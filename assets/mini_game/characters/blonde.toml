@@ -9,6 +9,14 @@ sprite = "mini_game/images/blonde_base.png"
 offset = { x = 0.0, y = 0.0 }
 
 [[character.segments]]
+id = "eyebrows"
+layer_offset = 0.8
+sprite = "mini_game/images/blonde_eyebrows.png"
+scale = 0.24
+rotation = 10.25
+offset = { x = -25.0, y = 380.0 }
+
+[[character.segments]]
 id = "eyes"
 layer_offset = 1.0
 sprite = "mini_game/images/blonde_eyes_open.png"

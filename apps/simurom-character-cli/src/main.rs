@@ -45,51 +45,73 @@ struct Args {
   assets_dir: PathBuf
 }
 
-fn remove_white_background(img: &mut RgbaImage) {
-  let (width, height) = img.dimensions();
+fn remove_white_background(
+  img: &mut RgbaImage
+) {
+  let (width, height) =
+    img.dimensions();
   if width == 0 || height == 0 {
     return;
   }
 
-  let mut visited = vec![false; (width * height) as usize];
-  let mut queue = std::collections::VecDeque::new();
+  let mut visited = vec![
+    false;
+    (width * height)
+      as usize
+  ];
+  let mut queue =
+    std::collections::VecDeque::new();
 
-  // Start BFS from the four corners of the image
+  // Start BFS from the four corners of
+  // the image
   let corners = [
     (0, 0),
     (width - 1, 0),
     (0, height - 1),
-    (width - 1, height - 1),
+    (width - 1, height - 1)
   ];
 
   for &(x, y) in &corners {
     let idx = (y * width + x) as usize;
     if !visited[idx] {
       let pixel = img.get_pixel(x, y);
-      if pixel[0] > 240 && pixel[1] > 240 && pixel[2] > 240 && pixel[3] > 0 {
+      if pixel[0] > 240
+        && pixel[1] > 240
+        && pixel[2] > 240
+        && pixel[3] > 0
+      {
         visited[idx] = true;
         queue.push_back((x, y));
       }
     }
   }
 
-  while let Some((cx, cy)) = queue.pop_front() {
-    let pixel = img.get_pixel_mut(cx, cy);
+  while let Some((cx, cy)) =
+    queue.pop_front()
+  {
+    let pixel =
+      img.get_pixel_mut(cx, cy);
     pixel[3] = 0;
 
     let neighbors = [
       (cx.wrapping_sub(1), cy),
       (cx + 1, cy),
       (cx, cy.wrapping_sub(1)),
-      (cx, cy + 1),
+      (cx, cy + 1)
     ];
 
     for &(nx, ny) in &neighbors {
       if nx < width && ny < height {
-        let nidx = (ny * width + nx) as usize;
+        let nidx =
+          (ny * width + nx) as usize;
         if !visited[nidx] {
-          let npixel = img.get_pixel(nx, ny);
-          if npixel[0] > 240 && npixel[1] > 240 && npixel[2] > 240 && npixel[3] > 0 {
+          let npixel =
+            img.get_pixel(nx, ny);
+          if npixel[0] > 240
+            && npixel[1] > 240
+            && npixel[2] > 240
+            && npixel[3] > 0
+          {
             visited[nidx] = true;
             queue.push_back((nx, ny));
           }
@@ -123,21 +145,39 @@ fn open_image(
 }
 
 struct LayerInfo {
-  path: PathBuf,
+  path:     PathBuf,
   offset_x: f32,
   offset_y: f32,
-  scale: Option<f32>,
-  rotation: Option<f32>,
+  scale:    Option<f32>,
+  rotation: Option<f32>
 }
 
-fn bilinear_sample(img: &RgbaImage, x: f32, y: f32) -> Option<image::Rgba<u8>> {
+fn bilinear_sample(
+  img: &RgbaImage,
+  x: f32,
+  y: f32
+) -> Option<image::Rgba<u8>> {
   let w = img.width() as f32;
   let h = img.height() as f32;
-  if x < 0.0 || x >= w - 1.0 || y < 0.0 || y >= h - 1.0 {
-    if x >= -0.5 && x < w - 0.5 && y >= -0.5 && y < h - 0.5 {
-      let px = x.round().clamp(0.0, w - 1.0) as u32;
-      let py = y.round().clamp(0.0, h - 1.0) as u32;
-      return Some(*img.get_pixel(px, py));
+  if x < 0.0
+    || x >= w - 1.0
+    || y < 0.0
+    || y >= h - 1.0
+  {
+    if x >= -0.5
+      && x < w - 0.5
+      && y >= -0.5
+      && y < h - 0.5
+    {
+      let px =
+        x.round().clamp(0.0, w - 1.0)
+          as u32;
+      let py =
+        y.round().clamp(0.0, h - 1.0)
+          as u32;
+      return Some(
+        *img.get_pixel(px, py)
+      );
     }
     return None;
   }
@@ -157,10 +197,17 @@ fn bilinear_sample(img: &RgbaImage, x: f32, y: f32) -> Option<image::Rgba<u8>> {
 
   let mut channels = [0u8; 4];
   for c in 0..4 {
-    let val0 = (p00[c] as f32) * (1.0 - dx) + (p10[c] as f32) * dx;
-    let val1 = (p01[c] as f32) * (1.0 - dx) + (p11[c] as f32) * dx;
-    let val = val0 * (1.0 - dy) + val1 * dy;
-    channels[c] = val.round().clamp(0.0, 255.0) as u8;
+    let val0 = (p00[c] as f32)
+      * (1.0 - dx)
+      + (p10[c] as f32) * dx;
+    let val1 = (p01[c] as f32)
+      * (1.0 - dx)
+      + (p11[c] as f32) * dx;
+    let val =
+      val0 * (1.0 - dy) + val1 * dy;
+    channels[c] =
+      val.round().clamp(0.0, 255.0)
+        as u8;
   }
 
   Some(image::Rgba(channels))
@@ -184,13 +231,17 @@ fn composite_layers(
       continue;
     }
 
-    let layer_img = open_image(&layer.path)?;
+    let layer_img =
+      open_image(&layer.path)?;
     let s = layer.scale.unwrap_or(1.0);
-    let r = layer.rotation.unwrap_or(0.0);
+    let r =
+      layer.rotation.unwrap_or(0.0);
 
     if s == 1.0 && r == 0.0 {
-      let x_offset = layer.offset_x as i64;
-      let y_offset = -(layer.offset_y as i64);
+      let x_offset =
+        layer.offset_x as i64;
+      let y_offset =
+        -(layer.offset_y as i64);
       image::imageops::overlay(
         &mut composite,
         &layer_img,
@@ -198,10 +249,14 @@ fn composite_layers(
         y_offset
       );
     } else {
-      let target_cx = base_size.0 as f32 / 2.0;
-      let target_cy = base_size.1 as f32 / 2.0;
-      let src_cx = layer_img.width() as f32 / 2.0;
-      let src_cy = layer_img.height() as f32 / 2.0;
+      let target_cx =
+        base_size.0 as f32 / 2.0;
+      let target_cy =
+        base_size.1 as f32 / 2.0;
+      let src_cx =
+        layer_img.width() as f32 / 2.0;
+      let src_cy =
+        layer_img.height() as f32 / 2.0;
 
       let angle_rad = -r.to_radians();
       let cos_a = angle_rad.cos();
@@ -209,11 +264,17 @@ fn composite_layers(
 
       for ty in 0..base_size.1 {
         for tx in 0..base_size.0 {
-          let x3 = (tx as f32 - target_cx) - layer.offset_x;
-          let y3 = (target_cy - ty as f32) - layer.offset_y;
+          let x3 = (tx as f32
+            - target_cx)
+            - layer.offset_x;
+          let y3 = (target_cy
+            - ty as f32)
+            - layer.offset_y;
 
-          let x2 = x3 * cos_a - y3 * sin_a;
-          let y2 = x3 * sin_a + y3 * cos_a;
+          let x2 =
+            x3 * cos_a - y3 * sin_a;
+          let y2 =
+            x3 * sin_a + y3 * cos_a;
 
           let x1 = x2 / s;
           let y1 = y2 / s;
@@ -221,21 +282,42 @@ fn composite_layers(
           let sx = x1 + src_cx;
           let sy = src_cy - y1;
 
-          if let Some(sp) = bilinear_sample(&layer_img, sx, sy) {
-            let sa = sp[3] as f32 / 255.0;
+          if let Some(sp) =
+            bilinear_sample(
+              &layer_img, sx, sy
+            )
+          {
+            let sa =
+              sp[3] as f32 / 255.0;
             if sa > 0.0 {
-              let dp = composite.get_pixel_mut(tx, ty);
-              let da = dp[3] as f32 / 255.0;
+              let dp = composite
+                .get_pixel_mut(tx, ty);
+              let da =
+                dp[3] as f32 / 255.0;
 
-              let out_a = sa + da * (1.0 - sa);
+              let out_a =
+                sa + da * (1.0 - sa);
               if out_a > 0.0 {
                 for c in 0..3 {
-                  let src_c = sp[c] as f32;
-                  let dest_c = dp[c] as f32;
-                  let blended = (src_c * sa + dest_c * da * (1.0 - sa)) / out_a;
-                  dp[c] = blended.round().clamp(0.0, 255.0) as u8;
+                  let src_c =
+                    sp[c] as f32;
+                  let dest_c =
+                    dp[c] as f32;
+                  let blended = (src_c
+                    * sa
+                    + dest_c
+                      * da
+                      * (1.0 - sa))
+                    / out_a;
+                  dp[c] = blended
+                    .round()
+                    .clamp(0.0, 255.0)
+                    as u8;
                 }
-                dp[3] = (out_a * 255.0).round().clamp(0.0, 255.0) as u8;
+                dp[3] = (out_a * 255.0)
+                  .round()
+                  .clamp(0.0, 255.0)
+                  as u8;
               }
             }
           }
@@ -356,11 +438,11 @@ fn main() -> Result<()> {
         .assets_dir
         .join(&seg.sprite);
       layers.push(LayerInfo {
-        path: sprite_path,
+        path:     sprite_path,
         offset_x: seg.offset.x,
         offset_y: seg.offset.y,
-        scale: seg.scale,
-        rotation: seg.rotation,
+        scale:    seg.scale,
+        rotation: seg.rotation
       });
     }
 
@@ -411,7 +493,9 @@ fn main() -> Result<()> {
   {
     let mut blink_frames_paths =
       Vec::new();
-    let mut eyes_segment_idx: Option<usize> = None;
+    let mut eyes_segment_idx: Option<
+      usize
+    > = None;
 
     for (idx, seg) in
       segments.iter().enumerate()
@@ -482,8 +566,9 @@ fn main() -> Result<()> {
     // partial2 -> partial1 -> open
     let active_sequence =
       blink_frames_paths.clone();
-    let mut reverse_sequence: Vec<String> =
-      Vec::new();
+    let mut reverse_sequence: Vec<
+      String
+    > = Vec::new();
     if active_sequence.len() > 2 {
       for frame in active_sequence
         .iter()
@@ -542,11 +627,11 @@ fn main() -> Result<()> {
               .join(&seg.sprite)
           };
         layers.push(LayerInfo {
-          path: sprite_path,
+          path:     sprite_path,
           offset_x: seg.offset.x,
           offset_y: seg.offset.y,
-          scale: seg.scale,
-          rotation: seg.rotation,
+          scale:    seg.scale,
+          rotation: seg.rotation
         });
       }
 
