@@ -5,3 +5,8 @@ tmp
 output
 *.mp4
 artifacts
+
+# Python virtualenv and cache ignores
+.venv/
+__pycache__/
+*.pyc
