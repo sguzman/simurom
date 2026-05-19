@@ -29,7 +29,7 @@ def main():
         
     # Save static preview
     static_preview = cropped_frames[0]
-    output_png = "/home/admin/.gemini/antigravity/brain/7c8dab13-650c-4f8b-8ff3-3a5aa8950c2e/eyes_preview.png"
+    output_png = "eyes_preview.png"
     static_preview.save(output_png, "PNG")
     print(f"Saved static preview to {output_png}")
     
@@ -69,7 +69,7 @@ def main():
         
         gif_images.append(p_img)
         
-    output_gif = "/home/admin/.gemini/antigravity/brain/7c8dab13-650c-4f8b-8ff3-3a5aa8950c2e/eyes_blinking.gif"
+    output_gif = "eyes_blinking.gif"
     
     # Save animated GIF
     gif_images[0].save(
